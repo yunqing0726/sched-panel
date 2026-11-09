@@ -486,7 +486,12 @@ function relayNewItem(o){
 
 function save(){ try { localStorage.setItem(STORE, JSON.stringify(state)); } catch(e){} }
 const DONE_EMBED = new Set(items.filter(it => it["_done"]).map(it => it.id));
-function isDone(id){ return !!(state[id] && state[id].done) || DONE_EMBED.has(id); }
+// 服务端已标完成、但用户在手机上撤销的条目：记在本地，避免被 DONE_EMBED 又顶回「已完成」
+const UNDO_KEY = "qq-undone-v1";
+let UNDONE = new Set();
+try { UNDONE = new Set(JSON.parse(localStorage.getItem(UNDO_KEY) || "[]")); } catch(e) { UNDONE = new Set(); }
+function saveUndone(){ try { localStorage.setItem(UNDO_KEY, JSON.stringify([...UNDONE])); } catch(e){} }
+function isDone(id){ return !!(state[id] && state[id].done) || (DONE_EMBED.has(id) && !UNDONE.has(id)); }
 
 // —— 勾选回传：局域网直连电脑 + ntfy 云端中继（全自动，不需要点按钮）——
 // 打勾后：立刻试本机 /api/done；同时投递到 ntfy 主题，电脑开机/后台守护会合并。
@@ -666,8 +671,8 @@ function itemNode(it){
   row.dataset.id = it.id;
   const cb = document.createElement("input"); cb.type="checkbox"; cb.checked=done;
   cb.addEventListener("change", ()=>{
-    if (cb.checked) { state[it.id]={done:true, ts:Date.now()}; toast("已完成：" + it["事项"]); }
-    else { delete state[it.id]; toast("已撤销，移回待办：" + it["事项"]); }
+    if (cb.checked) { state[it.id]={done:true, ts:Date.now()}; UNDONE.delete(it.id); saveUndone(); toast("已完成：" + it["事项"]); }
+    else { delete state[it.id]; UNDONE.add(it.id); saveUndone(); toast("已撤销，移回待办：" + it["事项"]); }
     save();
     // 写回抽取记忆：完成过的事项，以后模型再抽到也不显示
     // 本地队列 → ntfy 中继 → 电脑开机后 pull_ticks.py 合并
