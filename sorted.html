@@ -781,12 +781,29 @@ async function syncConfirmed(){
   } catch(e) { /* 没有本地服务（直接开文件）就跳过 */ }
 }
 
+function confirmRelay(id){
+  // 云端副本没有后端：把「已收入日程」也经 ntfy 中继回传，电脑 pull_ticks 收到后写 confirmed_new.json
+  try {
+    fetch("https://ntfy.sh/" + TICK_TOPIC, {method:"POST", keepalive:true,
+          headers:{"Content-Type":"text/plain"},
+          body: JSON.stringify({app:"sched", v:1, kind:"confirm", id:String(id), ts:Date.now()})})
+      .catch(()=>{});
+  } catch(e) {}
+}
 async function confirmNew(it, row){
   confirmedLocal.add(nkey(it));
   render();
+  // 云端副本：fetch("/api/confirm") 会 404，但 fetch 对 404 不抛错 → 原来会谎报「已收入日程」。
+  // 改成走中继，并且说真话（2026-11-10 修）。
+  if (!isLocalPanel()) {
+    confirmRelay(nkey(it));
+    toast("已标记「收入日程」，经中继回传电脑（约 2 分钟），刷新后不会再出现");
+    return;
+  }
   try {
-    await fetch("/api/confirm", {method:"POST", headers:{"Content-Type":"application/json"},
+    const r = await fetch("/api/confirm", {method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({id: nkey(it)})});
+    if (!r.ok) throw new Error("HTTP " + r.status);
     toast("已收入日程");
   } catch(e) { toast("已本地收入，但没写回（下次刷新可能还出现）"); }
 }
