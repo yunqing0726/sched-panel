@@ -823,6 +823,7 @@ function confirmRelay(id){
 }
 async function confirmNew(it, row){
   confirmedLocal.add(nkey(it));
+  saveConfirmed();   // 写 localStorage：别的标签页（另外三个视图）靠 storage 事件跟着变
   render();
   // 云端副本：fetch("/api/confirm") 会 404，但 fetch 对 404 不抛错 → 原来会谎报「已收入日程」。
   // 改成走中继，并且说真话（2026-11-10 修）。
