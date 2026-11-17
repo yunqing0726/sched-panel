@@ -365,7 +365,8 @@ body.kbview #kb-root{display:block}
   
 <div id="kb-root">
   <div class="kbtool">
-    <button class="btn btn-primary" id="kb-upload">📷 上传照片</button>
+    <button class="btn btn-primary" id="kb-upload">📷 拍照</button>
+    <button class="btn" id="kb-pick">🖼 相册</button>
     <button class="btn" id="kb-newnote">✏️ 写文字</button>
     <button class="btn" id="kb-newcat">＋ 新建分类</button>
     <button class="btn" id="kb-sum">📄 生成总结</button>
@@ -377,6 +378,7 @@ body.kbview #kb-root{display:block}
   <div class="kblist" id="kb-list"></div>
 </div>
 <input type="file" id="kb-file" accept="image/*" capture="environment" multiple style="display:none">
+<input type="file" id="kb-file-pick" accept="image/*" multiple style="display:none">
 <div class="mask" id="kbmask" style="display:none">
   <div class="modal">
     <div class="mh"><b id="kbm-title">写一条知识</b><span class="mx" id="kbm-close">✕</span></div>
@@ -2522,7 +2524,7 @@ async function kbRefresh(){
 
   root.innerHTML = "";
   if (!pendingCards.length && !textCards.length && !serverItems.length){
-    root.innerHTML = '<div class="empty">这个分类还没有内容。点「📷 上传照片」拍题，或「✏️ 写文字」记一条知识点。</div>';
+    root.innerHTML = '<div class="empty">这个分类还没有内容。点「📷 拍照」拍题、「🖼 相册」选已有照片，或「✏️ 写文字」记一条知识点。</div>';
   }
   pendingCards.forEach(function(it){ root.appendChild(kbCard(it)); });
   textCards.forEach(function(it){ root.appendChild(kbCard(it)); });
@@ -2726,6 +2728,9 @@ function kbInit(){
   if (!up) return;
   up.onclick = function(){ document.getElementById("kb-file").click(); };
   document.getElementById("kb-file").onchange = function(ev){ kbUploadFiles(ev.target.files); ev.target.value = ""; };
+  const pick = document.getElementById("kb-pick");
+  if (pick) pick.onclick = function(){ document.getElementById("kb-file-pick").click(); };
+  document.getElementById("kb-file-pick").onchange = function(ev){ kbUploadFiles(ev.target.files); ev.target.value = ""; };
   document.getElementById("kb-newnote").onclick = function(){ kbOpenNote(null); };
   document.getElementById("kb-newcat").onclick = kbNewCat;
   document.getElementById("kb-sum").onclick = kbSummary;
