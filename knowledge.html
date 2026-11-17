@@ -311,6 +311,9 @@ body.kbview #kb-root{display:block}
 
 /* ---------- 手机（Edge / 微信 / Safari）适配 ---------- */
 @media (max-width:560px){
+  body.kbview{overflow-x:hidden}
+  #kb-hint{overflow-wrap:anywhere;word-break:break-word;white-space:normal}
+  .kbstat{white-space:normal}
   /* 5 个标签在窄屏上横向滚动，别挤成一团 */
   .viewbar{display:flex;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;border-radius:8px}
   .viewbar a{flex:0 0 auto;padding:7px 10px;font-size:12.5px;white-space:nowrap}
