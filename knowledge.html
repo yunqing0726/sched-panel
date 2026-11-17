@@ -1502,10 +1502,6 @@ async function loadPaid(){
                      (ex.at ? " · " + ex.at.slice(5, 16) : "");
       bar.appendChild(sp);
     }
-    bar.innerHTML = "<span>💰 DeepSeek 用量：今日 <b>" + (p.paid_calls_today||0) + "</b> 次 / <b>" +
-      yuan(p.paid_usd_today||0) + "</b>　累计 <b>" + (p.paid_calls_total||0) + "</b> 次 / <b>" +
-      yuan(p.paid_usd_total||0) + "</b></span><span class='sp'></span><span>上次调用 " +
-      (p.last || "—") + "（全部模型共 " + (p.calls_total||0) + " 次）</span>";
   } catch(e){ /* 没有服务就不显示 */ }
 }
 
