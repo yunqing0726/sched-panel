@@ -316,8 +316,8 @@ body.kbview #kb-root{display:block}
   .kbstat{white-space:normal}
   /* 5 个标签在窄屏上横向滚动，别挤成一团 */
   /* 手机 5 个标签压成一行：等高 30px、平分宽度、小字号（原来会折行且第一项被拉高） */
-  .viewbar{display:flex;flex-wrap:nowrap;width:100%;max-width:100%;height:32px;overflow:hidden;border-radius:8px}
-  .viewbar a{flex:1 1 0;min-width:0;height:32px;line-height:32px;padding:0 1px;font-size:10.5px;letter-spacing:-.2px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .viewbar{display:flex;flex-wrap:nowrap;width:100%;max-width:100%;height:34px;overflow-x:auto;overflow-y:hidden;border-radius:8px;-webkit-overflow-scrolling:touch}
+  .viewbar a{flex:1 1 0;min-width:0;height:34px;padding:1px 0;font-size:10px;line-height:1.12;letter-spacing:-.2px;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;display:flex;align-items:center;justify-content:center}
   .viewbar .vb-hint{display:none}
   body.kbview{padding-bottom:28px}
   .kbtool .btn{flex:1 1 46%;padding:9px 8px;font-size:13.5px}
