@@ -2472,6 +2472,12 @@ function kbTexToText(s){
        .replace(/\\theta/g, "θ").replace(/\\lambda/g, "λ").replace(/\\mu/g, "μ")
        .replace(/\\ln/g, "ln").replace(/\\log/g, "log").replace(/\\sin/g, "sin")
        .replace(/\\cos/g, "cos").replace(/\\tan/g, "tan").replace(/\\quad/g, "  ");
+  // 剩下的转义符号：\{a_n\} → {a_n}、\[ \] → [ ]、\( \) → ( )，再清掉漏网的命令
+  x = x.replace(/\\\{/g, "{").replace(/\\\}/g, "}")
+       .replace(/\\\[/g, "[").replace(/\\\]/g, "]")
+       .replace(/\\\(/g, "(").replace(/\\\)/g, ")")
+       .replace(/\\\\/g, "")
+       .replace(/\\ /g, " ");
   return x.replace(/\\[a-zA-Z]+/g, "");
 }
 
