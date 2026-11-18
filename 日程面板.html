@@ -2465,15 +2465,16 @@ function kbTexToText(s){
   x = x.replace(/\\lim_\{([^{}]*)\}/g, "lim($1)");
   x = x.replace(/\\lim/g, "lim");
   x = x.replace(/\\sqrt\{([^{}]*)\}/g, "√($1)");
-  x = x.replace(/\\to/g, "→").replace(/\\infty/g, "∞").replace(/\\cdot/g, "·")
-       .replace(/\\times/g, "×").replace(/\\div/g, "÷").replace(/\\pm/g, "±")
-       .replace(/\\le/g, "≤").replace(/\\ge/g, "≥").replace(/\\ne/g, "≠").replace(/\\neq/g, "≠")
+  // 注意顺序与词边界：\le 不能吃掉 \left、\to 不能吃掉 \top、\in 不能吃掉 \infty
+  x = x.replace(/\\to(?![A-Za-z])/g, "→").replace(/\\infty/g, "∞").replace(/\\cdot/g, "·")
+       .replace(/\\times/g, "×").replace(/\\div/g, "÷").replace(/\\pm(?![A-Za-z])/g, "±")
+       .replace(/\\le(?![A-Za-z])/g, "≤").replace(/\\ge(?![A-Za-z])/g, "≥").replace(/\\ne(?![A-Za-z])/g, "≠").replace(/\\neq/g, "≠")
        .replace(/\\in(?![A-Za-z])/g, "∈").replace(/\\notin/g, "∉")
        .replace(/\\subset/g, "⊂").replace(/\\cup/g, "∪").replace(/\\cap/g, "∩")
        .replace(/\\forall/g, "∀").replace(/\\exists/g, "∃")
        .replace(/\\sum/g, "∑").replace(/\\int/g, "∫")
        .replace(/\\rightarrow/g, "→").replace(/\\Rightarrow/g, "⇒")
-       .replace(/\\pi/g, "π").replace(/\\alpha/g, "α").replace(/\\beta/g, "β")
+       .replace(/\\pi(?![A-Za-z])/g, "π").replace(/\\alpha/g, "α").replace(/\\beta/g, "β")
        .replace(/\\theta/g, "θ").replace(/\\lambda/g, "λ").replace(/\\mu/g, "μ")
        .replace(/\\ln/g, "ln").replace(/\\log/g, "log").replace(/\\sin/g, "sin")
        .replace(/\\cos/g, "cos").replace(/\\tan/g, "tan").replace(/\\quad/g, "  ");
