@@ -2217,7 +2217,8 @@ if (isLocalPanel()) {
   // 2026-11-10 用户明确「以后只看云端页」，所以直接从 DOM 里摘掉，不留 display:none 的残骸。
   // 保留：btn-new（＋新建日程）/ btn-export（导出已完成清单）/ btn-reset（重置所有勾选）
   ["platbar","btn-update","btn-verify","btn-watch","btn-black","btn-notify","btn-groups",
-   "btn-sync","btn-save","btn-stars","runlog"].forEach(id => {
+   "btn-sync","btn-save","btn-stars","runlog","kb-docx","kb-upload","kb-pick","kb-newnote",
+   "kb-newcat","kb-sum","kb-openfolder"].forEach(id => {
     const e = document.getElementById(id);
     if (e && e.parentNode) e.parentNode.removeChild(e);
     else if (e) e.remove();
