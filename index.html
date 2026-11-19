@@ -2521,14 +2521,22 @@ function kbTexFix(seg){
   const rich = /\\(frac|sqrt|lim|sum|int|cdot|times|div|pm|le|ge|ne|to|infty|ln|log|exp|sin|cos|tan|pi|alpha|beta|theta|lambda|mu|neq|in|subset|cup|cap|forall|exists|rightarrow|Rightarrow)/.test(seg);
   if (!hasCJK && rich){
     const t = seg.trim();
-    if (t) return "$$" + t + "$$";   // 整段都是公式：块级公式
+    if (t) return "$$" + t.replace(/\s*\n\s*/g, " ") + "$$";   // 整段都是公式：块级公式（换行必须压掉，否则 KaTeX 空渲染）
   }
   if (rich) return kbWrapRuns(seg);   // 中文里夹公式：只包公式片段，交给 KaTeX
   return kbTexToText(seg);            // 只剩孤立命令残骸：转人读文本
 }
 
+// KaTeX 的 $$...$$ 里不能出现真实换行（会 ParseError，throwOnError:false 时整段渲染成空白），
+// 而模型输出的块级公式经常带换行 → 统一压成空格。见 2026-11-19 用户「公式全空」截图。
+function kbFlattenTex(s){
+  return String(s || "").replace(/\$\$([\s\S]*?)\$\$/g, function(m, body){
+    return "$$" + body.replace(/\s*\n\s*/g, " ") + "$$";
+  });
+}
+
 function kbMath(s){
-  const t = String(s == null ? "" : s);
+  const t = kbFlattenTex(String(s == null ? "" : s));
   // $$...$$ / $...$ 里的 LaTeX 原样保留，交给 KaTeX；其余段落补定界符或转人读文本
   return t.split(/(\$\$[\s\S]*?\$\$|\$[^$\n]+\$)/).map(function(seg, i){
     if (i % 2 === 1) return seg;
