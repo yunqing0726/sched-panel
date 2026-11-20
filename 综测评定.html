@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>综测评定 · 孙梓晨 20263080</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#eef2f7;color:#1f2937;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+h1{font-size:22px;margin:6px 0 2px}
+.sub{color:#6b7280;font-size:12.5px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin:12px 0;
+  box-shadow:0 1px 3px rgba(15,23,42,.05)}
+.card h2{font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11.5px;background:#eef2ff;color:#3730a3}
+.pill.red{background:#fee2e2;color:#b91c1c}.pill.green{background:#dcfce7;color:#15803d}
+.pill.amber{background:#fef3c7;color:#b45309}.pill.blue{background:#dbeafe;color:#1d4ed8}
+.btn{display:inline-block;padding:5px 12px;border-radius:8px;border:1px solid #cfd8e3;background:#fff;
+  color:#1f2937;cursor:pointer;font-size:12.5px;margin-right:6px}
+.btn:hover{background:#f3f7fc}
+.btn.primary{background:linear-gradient(#2f6fd0,#245aa8);color:#fff;border-color:#245aa8}
+.btn.ok{background:#16a34a;border-color:#16a34a;color:#fff}
+.btn.warn{background:#f59e0b;border-color:#f59e0b;color:#fff}
+.btn.ghost{color:#6b7280}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.yearbar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.yearbar a{padding:4px 12px;border:1px solid #cfd8e3;border-radius:8px;background:#fff;color:#33404f;
+  text-decoration:none;font-size:12.5px}
+.yearbar a.on{background:linear-gradient(#2f6fd0,#245aa8);color:#fff;border-color:#245aa8}
+.dims{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px}
+.dim{border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;background:#fbfdff}
+.dim h3{margin:0 0 6px;font-size:14px;display:flex;justify-content:space-between}
+.dim .score{font-variant-numeric:tabular-nums;color:#1d4ed8}
+.dim ul{margin:4px 0 0;padding-left:18px}
+.dim li{margin:3px 0}
+.dim .lab{color:#6b7280;font-size:12px}
+.item{border:1px solid #e5eaf1;border-radius:10px;padding:9px 11px;margin:8px 0;background:#fff;
+  display:flex;gap:12px;align-items:flex-start}
+.item.done{background:#f6fef9;border-color:#bbf7d0}
+.item img.thumb{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #e5eaf1;background:#f3f4f6}
+.item .body{flex:1;min-width:0}
+.item .name{font-weight:600;word-break:break-all}
+.item .meta{color:#6b7280;font-size:12px;margin-top:2px;word-break:break-all}
+.item .acts{margin-top:6px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.filters .chip{padding:3px 10px;border-radius:999px;border:1px solid #cfd8e3;background:#fff;cursor:pointer;font-size:12px}
+.filters .chip.on{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
+.empty{color:#9ca3af;padding:10px 0}
+.mask{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;z-index:60}
+.mask.on{display:flex}
+.mask .box{background:#fff;border-radius:14px;padding:16px 18px;width:min(720px,92vw);max-height:82vh;overflow:auto}
+.mask h3{margin:0 0 8px;font-size:15px}
+.glist{max-height:52vh;overflow:auto;border:1px solid #e5eaf1;border-radius:8px;padding:8px}
+.glist label{display:flex;gap:8px;align-items:center;padding:3px 2px;font-size:13px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#111827;color:#fff;
+  padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:80}
+.toast.on{opacity:.94}
+.hint{color:#6b7280;font-size:12.5px;margin:4px 0 0}
+table.sum{width:100%;border-collapse:collapse;font-size:13px}
+table.sum th,table.sum td{border-bottom:1px solid #eef2f7;padding:6px 4px;text-align:left}
+table.sum th{color:#6b7280;font-weight:600;font-size:12px}
+</style></head><body>
+<div class="wrap">
+  <h1>综测评定 <span class="sub">孙梓晨 · 20263080 · 机器人科学与工程学院</span></h1>
+  <div class="sub">规则依据：《机器人科学与工程学院、未来技术学院本科生成长综合评价实施办法（试行）》
+    · 六维各 50 分、总分 300 · 维度等级取「有效指标中最低等级」→ 想要六维全 A，每一项都得 ≥A</div>
+
+  <div class="card">
+    <h2>📅 学年 <span class="pill blue" id="yearnow"></span></h2>
+    <div class="yearbar" id="yearbar"></div>
+    <div class="hint">一年一套，互相独立；佐证材料以「出具单位的公章 + 落款」为准，同一份材料不能跨指标跨维度重复用。</div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 六维全 A 攻略 <span class="pill" id="allastate"></span></h2>
+    <div class="dims" id="dims"></div>
+  </div>
+
+  <div class="card">
+    <h2>📎 待确认的证明材料 <span class="pill amber" id="pendcount"></span>
+      <button class="btn" id="btnscan" style="margin-left:auto">🔄 重新扫描</button></h2>
+    <div class="hint">从 QQ / 微信群里挑出来的「志愿证明 / 活动证明 / 活动记录」类附件。点「有章 ✓」才会归到
+      <code>qq-digest/综测/有盖章/</code> 并参与算分。</div>
+    <div class="filters" id="filters"></div>
+    <div id="files"></div>
+  </div>
+
+  <div class="card">
+    <h2>📊 算分（只算绝对分项） <span class="pill" id="total"></span></h2>
+    <table class="sum" id="sumtable"></table>
+    <div class="hint" id="sumhint"></div>
+  </div>
+
+  <div class="card">
+    <h2>⬆️ 自己提交材料</h2>
+    <div class="hint">没有存在群里的材料（纸质盖章拍照、部门开的证明）从这里传上来，存到
+      <code>qq-digest/综测/已提交/</code>，然后在上面的「待确认」里点有章。</div>
+    <p><input type="file" id="fileinput" multiple>
+      <button class="btn primary" id="btnupload">上传</button></p>
+  </div>
+
+  <div class="card">
+    <h2>👥 综测独立抽取群 <span class="pill" id="gcount"></span>
+      <button class="btn" id="btngroups" style="margin-left:auto">选择群</button></h2>
+    <div class="hint">这个栏目的抽群清单**独立**于日程表（日程表那边不动）。只抽这些群里带「证明/记录」字样的附件。</div>
+  </div>
+</div>
+
+<div class="mask" id="gmask"><div class="box">
+  <h3>勾选要抽的群（综测专用）</h3>
+  <div class="hint">不勾 = 不抽这个群。新出现的群先不勾，避免误抓。</div>
+  <div class="glist" id="glist"></div>
+  <p style="text-align:right;margin:10px 0 0">
+    <button class="btn" id="gall">全选</button>
+    <button class="btn" id="gnone">全不选</button>
+    <button class="btn primary" id="gsave">保存</button>
+    <button class="btn ghost" id="gclose">关闭</button>
+  </p>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const Z = {"year": "2026-2027", "years": ["2026-2027", "2027-2028", "2028-2029", "2029-2030", "2030-2031"], "files": [{"类型": "文件", "文件名": "2026-2027学年秋季学期机器人科学与工程学院10月志愿认证单 初版.pdf", "uuid": "6313a136-e7e2-4e26-b659-a814ab5ebb5d", "缓存": "", "来源": "QQ", "群号": "2940902013", "群名": "群 2940902013（本地无群名，可能已退群）", "时间": "2026-11-16 14:46", "_ts": 1794811574, "发送者": "", "强关键词": true, "弱关键词": false, "本人名": true, "_key": "2940902013|1794811574|2026-2027学年秋季学期机器人科学与工程学院10月志愿认证单 初版.pdf", "_状态": "待确认", "算分": {"维度": "劳动教育", "指标": "志愿服务时长", "分": 0, "等级": "", "待排名": false, "可算分": false, "说明": "是志愿类材料，但文件名里没有小时数 → 打开看时长后手动填"}}, {"类型": "文件", "文件名": "2026-2027学年秋季学期机器人科学与工程学院9月志愿认证单 终版.pdf", "uuid": "3f10b7ed-6d8e-4faf-827e-9abe03dab9d7", "缓存": "", "来源": "QQ", "群号": "2940902013", "群名": "群 2940902013（本地无群名，可能已退群）", "时间": "2026-10-26 16:17", "_ts": 1793002659, "发送者": "", "强关键词": true, "弱关键词": false, "本人名": true, "_key": "2940902013|1793002659|2026-2027学年秋季学期机器人科学与工程学院9月志愿认证单 终版.pdf", "_状态": "待确认", "算分": {"维度": "劳动教育", "指标": "志愿服务时长", "分": 0, "等级": "", "待排名": false, "可算分": false, "说明": "是志愿类材料，但文件名里没有小时数 → 打开看时长后手动填"}}, {"类型": "文件", "文件名": "未来π对撞学术分享第五期活动证明.pdf", "uuid": "5c35e58c-d2cc-4c23-9b8b-0a8172241689", "缓存": "", "来源": "QQ", "群号": "3252299032", "群名": "群 3252299032（本地无群名，可能已退群）", "时间": "2026-11-19 18:35", "_ts": 1795084502, "发送者": "王佳音", "强关键词": true, "弱关键词": true, "本人名": false, "_key": "3252299032|1795084502|未来π对撞学术分享第五期活动证明.pdf", "_状态": "待确认", "算分": {"维度": "智育", "指标": "学术报告讲座", "分": 1, "等级": "", "待排名": true, "可算分": true, "说明": "按参加 1 次记 1 分；这一项的**等级**取决于年级专业排名（前 30%/80%/95%），等学院排名"}}, {"类型": "文件", "文件名": "“回声重阳，听见岁月的答案”重阳节活动证明(1).pdf", "uuid": "acc8da0d-3c6f-4ed2-88d8-027eaf19f6e2", "缓存": "", "来源": "QQ", "群号": "2028321652", "群名": "群 2028321652（本地无群名，可能已退群）", "时间": "2026-11-17 22:21", "_ts": 1794925289, "发送者": "我烤箱咋滴", "强关键词": true, "弱关键词": true, "本人名": false, "_key": "2028321652|1794925289|“回声重阳，听见岁月的答案”重阳节活动证明(1).pdf", "_状态": "待确认", "算分": {"维度": "德育", "指标": "理论学习及教育活动", "分": 0, "等级": "", "待排名": false, "可算分": false, "说明": "缺级别或奖项（如「一等奖/校级」），需要手动定"}}, {"类型": "文件", "文件名": "未来π对撞学术分享第五期活动证明.pdf", "uuid": "24f83da9-4b7d-4ba6-9f71-6870390bc661", "缓存": "", "来源": "QQ", "群号": "3252299032", "群名": "群 3252299032（本地无群名，可能已退群）", "时间": "2026-11-17 15:05", "_ts": 1794899132, "发送者": "王佳音", "强关键词": true, "弱关键词": true, "本人名": false, "_key": "3252299032|1794899132|未来π对撞学术分享第五期活动证明.pdf", "_状态": "待确认", "算分": {"维度": "智育", "指标": "学术报告讲座", "分": 1, "等级": "", "待排名": true, "可算分": true, "说明": "按参加 1 次记 1 分；这一项的**等级**取决于年级专业排名（前 30%/80%/95%），等学院排名"}}, {"类型": "文件", "文件名": "妙笔留声活动证明.pdf", "uuid": "ab065217-118d-46c0-9223-473fc6fd3778", "缓存": "", "来源": "QQ", "群号": "3242765528", "群名": "群 3242765528（本地无群名，可能已退群）", "时间": "2026-11-17 14:18", "_ts": 1794896328, "发送者": "", "强关键词": true, "弱关键词": true, "本人名": false, "_key": "3242765528|1794896328|妙笔留声活动证明.pdf", "_状态": "待确认", "算分": {"维度": "德育", "指标": "理论学习及教育活动", "分": 0, "等级": "", "待排名": false, "可算分": false, "说明": "缺级别或奖项（如「一等奖/校级」），需要手动定"}}, {"类型": "文件", "文件名": "“辽聊反诈·AI同行”高校反诈专题宣传作品创作大赛参与证明_.pdf", "uuid": "53c79cbb-b162-4697-a4b2-04453d22a799", "缓存": "", "来源": "QQ", "群号": "3242765528", "群名": "群 3242765528（本地无群名，可能已退群）", "时间": "2026-11-16 15:34", "_ts": 1794814488, "发送者": "", "强关键词": true, "弱关键词": false, "本人名": false, "_key": "3242765528|1794814488|“辽聊反诈·AI同行”高校反诈专题宣传作品创作大赛参与证明_.pdf", "_状态": "待确认", "算分": {"维度": "创新实践", "指标": "创新创业竞赛", "分": 1, "等级": "A", "待排名": false, "可算分": true, "说明": "只写了参与，按参与 1 分记（若实际获奖请手动改）"}}, {"类型": "文件", "文件名": "2026-2027学年秋季学期未来技术学院10月志愿认证单 初版.pdf", "uuid": "9953a32d-fd8d-420b-b1a6-a92938227824", "缓存": "", "来源": "QQ", "群号": "2940902013", "群名": "群 2940902013（本地无群名，可能已退群）", "时间": "2026-11-16 14:46", "_ts": 1794811574, "发送者": "", "强关键词": true, "弱关键词": false, "本人名": false, "_key": "2940902013|1794811574|2026-2027学年秋季学期未来技术学院10月志愿认证单 初版.pdf", "_状态": "待确认", "算分": {"维度": "劳动教育", "指标": "志愿服务时长", "分": 0, "等级": "", "待排名": false, "可算分": false, "说明": "是志愿类材料，但文件名里没有小时数 → 打开看时长后手动填"}}, {"类型": "文件", "文件名": "“辽聊反诈.AI同行”高校反诈作品征集东北大学晋级名单.xls", "uuid": "911daba4-0ab0-4098-b001-dfb507e1e4f7", "缓存": "", "来源": "QQ", "群号": "3242765528", "群名": "群 3242765528（本地无群名，可能已退群）", "时间": "2026-11-09 09:39", "_ts": 1794188363, "发送者": "", "强关键词": true, "弱关键词": false, "本人名": false, "_key": "3242765528|1794188363|“辽聊反诈.AI同行”高校反诈作品征集东北大学晋级名单.xls", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "看起来是名单/通知类文件，不算分，只作线索", "可算分": false}}, {"类型": "文件", "文件名": "SmartCar知识竞赛晋级成员名单.xlsx", "uuid": "096958f2-f054-4d7c-965b-0e6dfad13c71", "缓存": "", "来源": "QQ", "群号": "2036048341", "群名": "群 2036048341（本地无群名，可能已退群）", "时间": "2026-10-28 20:48", "_ts": 1793191721, "发送者": "雄鹰展翅", "强关键词": true, "弱关键词": true, "本人名": false, "_key": "2036048341|1793191721|SmartCar知识竞赛晋级成员名单.xlsx", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "看起来是名单/通知类文件，不算分，只作线索", "可算分": false}}, {"类型": "文件", "文件名": "2026-2027学年未来技术学院9月志愿认证单 终版.pdf", "uuid": "35b65ba9-5cf1-4bbb-8228-eb5ac78a2b09", "缓存": "", "来源": "QQ", "群号": "2940902013", "群名": "群 2940902013（本地无群名，可能已退群）", "时间": "2026-10-26 16:17", "_ts": 1793002651, "发送者": "", "强关键词": true, "弱关键词": false, "本人名": false, "_key": "2940902013|1793002651|2026-2027学年未来技术学院9月志愿认证单 终版.pdf", "_状态": "待确认", "算分": {"维度": "劳动教育", "指标": "志愿服务时长", "分": 0, "等级": "", "待排名": false, "可算分": false, "说明": "是志愿类材料，但文件名里没有小时数 → 打开看时长后手动填"}}, {"类型": "文件", "文件名": "关于开展东北大学2026年第一批社会奖助学金评定工作的通知.doc", "uuid": "1409bed9-d1b8-4887-96d2-3fe6445def3d", "缓存": "", "来源": "QQ", "群号": "2474663851", "群名": "群 2474663851（本地无群名，可能已退群）", "时间": "2026-10-12 12:53", "_ts": 1791780819, "发送者": "Loveforever", "强关键词": true, "弱关键词": false, "本人名": false, "_key": "2474663851|1791780819|关于开展东北大学2026年第一批社会奖助学金评定工作的通知.doc", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "看起来是名单/通知类文件，不算分，只作线索", "可算分": false}}, {"类型": "文件", "文件名": "启航计划第一期活动证明信息.xlsx", "uuid": "05388189-cfeb-447c-b1cf-35568ce62770", "缓存": "", "来源": "QQ", "群号": "2817664325", "群名": "群 2817664325（本地无群名，可能已退群）", "时间": "2026-09-22 11:35", "_ts": 1790048100, "发送者": "Wiley 闫", "强关键词": true, "弱关键词": true, "本人名": false, "_key": "2817664325|1790048100|启航计划第一期活动证明信息.xlsx", "_状态": "待确认", "算分": {"维度": "德育", "指标": "理论学习及教育活动", "分": 0, "等级": "", "待排名": false, "可算分": false, "说明": "缺级别或奖项（如「一等奖/校级」），需要手动定"}}, {"类型": "文件", "文件名": "录取结果公示.pdf", "uuid": "99040c30-9bce-4864-a01e-b0ebc954e49b", "缓存": "", "来源": "QQ", "群号": "2871689127", "群名": "群 2871689127（本地无群名，可能已退群）", "时间": "2026-09-15 11:18", "_ts": 1789442311, "发送者": "", "强关键词": true, "弱关键词": false, "本人名": false, "_key": "2871689127|1789442311|录取结果公示.pdf", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "看起来是名单/通知类文件，不算分，只作线索", "可算分": false}}, {"类型": "图片", "文件名": "$45ea6486c07b9d3d5abf540ba28a04c1.png", "md5": "45ea6486c07b9d3d5abf540ba28a04c1", "缓存": "D:\\Users\\lianxiang\\Documents\\Tencent Files\\1072744662\\nt_qq\\nt_data\\Pic\\2026-11\\Ori\\45ea6486c07b9d3d5abf540ba28a04c1.png", "来源": "QQ", "群号": "2474663851", "群名": "群 2474663851（本地无群名，可能已退群）", "时间": "2026-11-17 10:21", "_ts": 1794882079, "发送者": "Loveforever", "强关键词": false, "弱关键词": false, "本人名": true, "_key": "2474663851|1794882079|$45ea6486c07b9d3d5abf540ba28a04c1.png", "归档": "D:\\Users\\lianxiang\\Documents\\deepseek-harness\\default-workspace\\qq-digest\\综测\\已缓存\\群 2474663851（本地无群名，可能已退群）\\$45ea6486c07b9d3d5abf540ba28a04c1_1.png", "_状态": "有章", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "没匹配到规则，需要你手动定维度和分值", "可算分": false}}, {"类型": "图片", "文件名": "$90421da99d5852f51b7f343617a8b7c1.png", "md5": "90421da99d5852f51b7f343617a8b7c1", "缓存": "D:\\Users\\lianxiang\\Documents\\Tencent Files\\1072744662\\nt_qq\\nt_data\\Pic\\2026-11\\Thumb\\90421da99d5852f51b7f343617a8b7c1_720.png", "来源": "QQ", "群号": "2561314726", "群名": "群 2561314726（本地无群名，可能已退群）", "时间": "2026-11-16 13:30", "_ts": 1794807016, "发送者": "辅导员张老师", "强关键词": false, "弱关键词": false, "本人名": true, "_key": "2561314726|1794807016|$90421da99d5852f51b7f343617a8b7c1.png", "归档": "D:\\Users\\lianxiang\\Documents\\deepseek-harness\\default-workspace\\qq-digest\\综测\\已缓存\\群 2561314726（本地无群名，可能已退群）\\$90421da99d5852f51b7f343617a8b7c1_1.png", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "没匹配到规则，需要你手动定维度和分值", "可算分": false}}, {"类型": "文件", "文件名": "机器人科学与工程学院、未来技术学院本科生成长综合评价实施办法（试行）.pdf", "uuid": "4b75da9c-31e9-4d7f-b8a8-51c56cff2ab3", "缓存": "", "来源": "QQ", "群号": "1722605466", "群名": "群 1722605466（本地无群名，可能已退群）", "时间": "2026-11-13 16:04", "_ts": 1794557070, "发送者": "", "强关键词": false, "弱关键词": false, "本人名": true, "_key": "1722605466|1794557070|机器人科学与工程学院、未来技术学院本科生成长综合评价实施办法（试行）.pdf", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "看起来是名单/通知类文件，不算分，只作线索", "可算分": false}}, {"类型": "文件", "文件名": "机器人科学与工程学院、未来技术学院本科生成长综合评价实施办法（试行）.pdf", "uuid": "90c13e3b-dfd5-4312-8686-66471ae3a530", "缓存": "", "来源": "QQ", "群号": "1595816752", "群名": "群 1595816752（本地无群名，可能已退群）", "时间": "2026-11-13 15:16", "_ts": 1794554202, "发送者": "", "强关键词": false, "弱关键词": false, "本人名": true, "_key": "1595816752|1794554202|机器人科学与工程学院、未来技术学院本科生成长综合评价实施办法（试行）.pdf", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "看起来是名单/通知类文件，不算分，只作线索", "可算分": false}}, {"类型": "图片", "文件名": "$7bcc327a9b980fcd6a7f2d567b33fdbe.png", "md5": "7bcc327a9b980fcd6a7f2d567b33fdbe", "缓存": "", "来源": "QQ", "群号": "3252299032", "群名": "群 3252299032（本地无群名，可能已退群）", "时间": "2026-11-09 17:48", "_ts": 1794217685, "发送者": "王佳音", "强关键词": false, "弱关键词": false, "本人名": true, "_key": "3252299032|1794217685|$7bcc327a9b980fcd6a7f2d567b33fdbe.png", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "没匹配到规则，需要你手动定维度和分值", "可算分": false}}, {"类型": "图片", "文件名": "$54b49d8891f2d67361ebca036b300f27.jpg", "md5": "54b49d8891f2d67361ebca036b300f27", "缓存": "", "来源": "QQ", "群号": "1595816752", "群名": "群 1595816752（本地无群名，可能已退群）", "时间": "2026-10-19 10:48", "_ts": 1792378108, "发送者": "", "强关键词": false, "弱关键词": false, "本人名": true, "_key": "1595816752|1792378108|$54b49d8891f2d67361ebca036b300f27.jpg", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "没匹配到规则，需要你手动定维度和分值", "可算分": false}}, {"类型": "文件", "文件名": "第八届阅读马拉松活动须知.docx", "uuid": "767a31b8-65da-4683-9b40-f92e4a7b9328", "缓存": "", "来源": "QQ", "群号": "2871689127", "群名": "群 2871689127（本地无群名，可能已退群）", "时间": "2026-11-13 09:37", "_ts": 1794533858, "发送者": "fastfloat", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "2871689127|1794533858|第八届阅读马拉松活动须知.docx", "_状态": "待确认", "算分": {"维度": "体育", "指标": "院级以上体育活动", "分": 0, "等级": "", "待排名": false, "可算分": false, "说明": "缺级别或奖项（如「一等奖/校级」），需要手动定"}}, {"类型": "文件", "文件名": "培训2.pdf", "uuid": "668e1308-b78a-45a5-8795-9ff2ef474dbf", "缓存": "", "来源": "QQ", "群号": "2719759897", "群名": "群 2719759897（本地无群名，可能已退群）", "时间": "2026-11-08 20:48", "_ts": 1794142117, "发送者": "", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "2719759897|1794142117|培训2.pdf", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "没匹配到规则，需要你手动定维度和分值", "可算分": false}}, {"类型": "文件", "文件名": "科技社团联合行动签到情况（合并）.xlsx", "uuid": "3d6b3d6f-a1cc-4321-a371-a1cf4be236d7", "缓存": "", "来源": "QQ", "群号": "2145940679", "群名": "群 2145940679（本地无群名，可能已退群）", "时间": "2026-11-06 19:00", "_ts": 1793962827, "发送者": "葉北", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "2145940679|1793962827|科技社团联合行动签到情况（合并）.xlsx", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "没匹配到规则，需要你手动定维度和分值", "可算分": false}}, {"类型": "文件", "文件名": "重阳活动信息（修改版）.xlsx", "uuid": "558ce8f0-cf86-11f1-8f5c-5254008562cd", "缓存": "", "来源": "QQ", "群号": "2954779775", "群名": "群 2954779775（本地无群名，可能已退群）", "时间": "2026-10-24 16:38", "_ts": 1792831130, "发送者": "zz", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "2954779775|1792831130|重阳活动信息（修改版）.xlsx", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "没匹配到规则，需要你手动定维度和分值", "可算分": false}}, {"类型": "文件", "文件名": "重阳节主题活动.xlsx", "uuid": "80d6ceb4-ced1-11f1-bc38-525400846d05", "缓存": "", "来源": "QQ", "群号": "2954779775", "群名": "群 2954779775（本地无群名，可能已退群）", "时间": "2026-10-23 19:04", "_ts": 1792753465, "发送者": "zz", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "2954779775|1792753465|重阳节主题活动.xlsx", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "没匹配到规则，需要你手动定维度和分值", "可算分": false}}, {"类型": "文件", "文件名": "科技社团联合行动签到情况（南湖）.xlsx", "uuid": "2b569779-d9da-4760-a374-74face06afe7", "缓存": "", "来源": "QQ", "群号": "3500601271", "群名": "群 3500601271（本地无群名，可能已退群）", "时间": "2026-10-22 16:27", "_ts": 1792657656, "发送者": "", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "3500601271|1792657656|科技社团联合行动签到情况（南湖）.xlsx", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "没匹配到规则，需要你手动定维度和分值", "可算分": false}}, {"类型": "文件", "文件名": "科技社团联合行动签到情况（浑南）(1).xlsx", "uuid": "85fef2f5-c140-4f18-97d5-3d2d3c41a86c", "缓存": "", "来源": "QQ", "群号": "3500601271", "群名": "群 3500601271（本地无群名，可能已退群）", "时间": "2026-10-22 16:27", "_ts": 1792657656, "发送者": "", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "3500601271|1792657656|科技社团联合行动签到情况（浑南）(1).xlsx", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "没匹配到规则，需要你手动定维度和分值", "可算分": false}}, {"类型": "文件", "文件名": "2026书香社报名表 (1).docx", "uuid": "ad23f5ee-b260-4c56-a70e-ea10cdb232cf", "缓存": "", "来源": "QQ", "群号": "3203490019", "群名": "群 3203490019（本地无群名，可能已退群）", "时间": "2026-10-17 15:19", "_ts": 1792221574, "发送者": "", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "3203490019|1792221574|2026书香社报名表 (1).docx", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "看起来是名单/通知类文件，不算分，只作线索", "可算分": false}}, {"类型": "文件", "文件名": "“外教社杯”全国高校青年人才全球胜任力大赛东北赛区比赛通知.docx", "uuid": "ce883fd7-5647-42bb-8a5a-9a2d012f4ae5", "缓存": "", "来源": "QQ", "群号": "348564482", "群名": "群 348564482（本地无群名，可能已退群）", "时间": "2026-10-11 16:15", "_ts": 1791706549, "发送者": "磊", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "348564482|1791706549|“外教社杯”全国高校青年人才全球胜任力大赛东北赛区比赛通知.docx", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "看起来是名单/通知类文件，不算分，只作线索", "可算分": false}}, {"类型": "文件", "文件名": "东北大学第二期“敢·表达”学生表达能力训练营活动通知.pdf", "uuid": "091f4c85-3114-4ab7-849d-9a0db44b1ad8", "缓存": "", "来源": "QQ", "群号": "2940902013", "群名": "群 2940902013（本地无群名，可能已退群）", "时间": "2026-09-28 18:19", "_ts": 1790590764, "发送者": "", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "2940902013|1790590764|东北大学第二期“敢·表达”学生表达能力训练营活动通知.pdf", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "看起来是名单/通知类文件，不算分，只作线索", "可算分": false}}, {"类型": "文件", "文件名": "附件2.表达能力训练营报名表.docx", "uuid": "08908860-c8e3-4191-bdb8-9de971c00529", "缓存": "", "来源": "QQ", "群号": "2940902013", "群名": "群 2940902013（本地无群名，可能已退群）", "时间": "2026-09-28 18:18", "_ts": 1790590733, "发送者": "", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "2940902013|1790590733|附件2.表达能力训练营报名表.docx", "_状态": "待确认", "算分": {"维度": "", "指标": "", "分": 0, "等级": "", "待排名": false, "说明": "看起来是名单/通知类文件，不算分，只作线索", "可算分": false}}, {"类型": "文件", "文件名": "竞赛星级表.pdf", "uuid": "1e1f4cd7-3e93-41a0-bece-dbb44da787cf", "缓存": "", "来源": "QQ", "群号": "1715503618", "群名": "群 1715503618（本地无群名，可能已退群）", "时间": "2026-09-19 19:28", "_ts": 1789817309, "发送者": "", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "1715503618|1789817309|竞赛星级表.pdf", "_状态": "待确认", "算分": {"维度": "创新实践", "指标": "创新创业竞赛", "分": 0, "等级": "", "待排名": false, "可算分": false, "说明": "缺级别或奖项（如「一等奖/校级」），需要手动定"}}, {"类型": "文件", "文件名": "东北大学学生竞赛时间与备赛总表(1).xlsx", "uuid": "1a3788e3-ee8e-4d8c-a929-2850a3148091", "缓存": "", "来源": "QQ", "群号": "1715503618", "群名": "群 1715503618（本地无群名，可能已退群）", "时间": "2026-09-19 19:28", "_ts": 1789817292, "发送者": "", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "1715503618|1789817292|东北大学学生竞赛时间与备赛总表(1).xlsx", "_状态": "待确认", "算分": {"维度": "创新实践", "指标": "创新创业竞赛", "分": 0, "等级": "", "待排名": false, "可算分": false, "说明": "缺级别或奖项（如「一等奖/校级」），需要手动定"}}, {"类型": "文件", "文件名": "东北大学学生创新创业竞赛星级分类表.pdf", "uuid": "9e15a81a-6311-4e49-a169-c6794d691447", "缓存": "", "来源": "QQ", "群号": "1345393799", "群名": "群 1345393799（本地无群名，可能已退群）", "时间": "2026-09-19 17:35", "_ts": 1789810526, "发送者": "", "强关键词": false, "弱关键词": true, "本人名": false, "_key": "1345393799|1789810526|东北大学学生创新创业竞赛星级分类表.pdf", "_状态": "待确认", "算分": {"维度": "创新实践", "指标": "创新创业竞赛", "分": 0, "等级": "", "待排名": false, "可算分": false, "说明": "缺级别或奖项（如「一等奖/校级」），需要手动定"}}], "state": {"2474663851|1794882079|$45ea6486c07b9d3d5abf540ba28a04c1.png": {"状态": "有章", "确认时间": "2026-11-20 12:19", "归档": "D:\\Users\\lianxiang\\Documents\\deepseek-harness\\default-workspace\\qq-digest\\综测\\有盖章\\群 2474663851（本地无群名，可能已退群）\\$45ea6486c07b9d3d5abf540ba28a04c1.png", "已完成": false, "完成时间": ""}}, "summary": {"维度": {"德育": {"分": 0.0, "上限": 50, "已算分项": 0, "待排名": 0, "待人工": 0, "提示": []}, "智育": {"分": 0.0, "上限": 50, "已算分项": 0, "待排名": 0, "待人工": 0, "提示": []}, "体育": {"分": 0.0, "上限": 50, "已算分项": 0, "待排名": 0, "待人工": 0, "提示": []}, "美育": {"分": 0.0, "上限": 50, "已算分项": 0, "待排名": 0, "待人工": 0, "提示": []}, "劳动教育": {"分": 0.0, "上限": 50, "已算分项": 0, "待排名": 0, "待人工": 0, "提示": []}, "创新实践": {"分": 0.0, "上限": 50, "已算分项": 0, "待排名": 0, "待人工": 0, "提示": []}}, "全部A_还差": [], "待排名": [], "待人工": ["$45ea6486c07b9d3d5abf540ba28a04c1.png（没认出维度）"], "六维是否可判全A": "还缺材料/还缺定级", "总分自评": 0.0}, "groups": {"qq": [{"gid": "1106558322", "name": "天弈", "n": 21579}, {"gid": "780307222", "name": "东大学习互助(26级本科生)", "n": 5386}, {"gid": "623821200", "name": "秩序：新曙光玩家①群", "n": 3854}, {"gid": "572549239", "name": "小C的AI交流小屋（原 TUI 群）", "n": 3023}, {"gid": "921774146", "name": "《天弈》书友二群", "n": 2415}, {"gid": "1128689264", "name": "失控 · 東雲广播（2群）", "n": 1740}, {"gid": "913748193", "name": "《天弈》书友一群", "n": 1607}, {"gid": "428564724", "name": "《天弈》核心群", "n": 1426}, {"gid": "1129776184", "name": "大学数学交流群一群", "n": 1339}, {"gid": "1121899492", "name": "晴空飞鸟的后宫8", "n": 1218}, {"gid": "909185100", "name": "neumathe 刷题群", "n": 1025}, {"gid": "1040166448", "name": "东大电脑问题咨询维修②", "n": 966}, {"gid": "940566221", "name": "天天酷跑新春版", "n": 644}, {"gid": "1040975996", "name": "数模工坊1群-光明顶", "n": 573}, {"gid": "703740520", "name": "go学长乱杀局", "n": 533}, {"gid": "1109530713", "name": "第十九届校学生科协会员群", "n": 461}, {"gid": "1106512628", "name": "26东北大学二手互助群", "n": 404}, {"gid": "1040876989", "name": "2027智能车实验室（浑南）招新群", "n": 382}, {"gid": "785010867", "name": "东北大学摄影协会", "n": 335}, {"gid": "1078401620", "name": "【2026】机器人学生群", "n": 332}, {"gid": "787317980", "name": "机器人2603班级群", "n": 302}, {"gid": "660163595", "name": "小葵与猫猫全球粉丝后援会二群", "n": 184}, {"gid": "415890746", "name": "地瓜组招新群", "n": 154}, {"gid": "1121982554", "name": "智创万象", "n": 125}, {"gid": "895549686", "name": "线性代数群", "n": 111}, {"gid": "1104960812", "name": "竞赛事务中心", "n": 85}, {"gid": "779271242", "name": "社区服务二部活动总群", "n": 84}, {"gid": "713034927", "name": "东北大学2026新生群交流群", "n": 82}, {"gid": "1039612597", "name": "浑南校区重阳节特色活动群1", "n": 81}, {"gid": "1124025708", "name": "智驭万象，创启新程——SmartCar智能车创新与科普设计竞赛", "n": 69}, {"gid": "869178475", "name": "机器人未来  志愿信息发布群", "n": 63}, {"gid": "1055819213", "name": "东大浑南书香社26级招新", "n": 63}, {"gid": "1129866146", "name": "\"万象翩跹，一纸寻心\"阅读马拉松活动群(浑南)", "n": 59}, {"gid": "1083022170", "name": "两院诗歌散文朗诵比赛", "n": 54}, {"gid": "1124391245", "name": "百度创意组招新群(暂时不知道要不要招工创智能物流组)", "n": 46}, {"gid": "613017054", "name": "东北大学KAB创业俱乐部（2026）", "n": 41}, {"gid": "1058746960", "name": "智能＋机器人", "n": 38}, {"gid": "1121117448", "name": "阳光正好 观演群", "n": 35}, {"gid": "930256385", "name": "【在用】机器人寝室长通知群", "n": 34}, {"gid": "1106873460", "name": "“辽聊反诈Ai同行”机器人未来反诈作品大赛", "n": 26}, {"gid": "1055506910", "name": "NEU海洋之心2026招新", "n": 22}, {"gid": "689665525", "name": "沈阳剧本杀狼人杀交友群", "n": 21}, {"gid": "1105100270", "name": "qwq、云清", "n": 19}, {"gid": "972629169", "name": "东北大学2026级新生群", "n": 18}, {"gid": "1051907388", "name": "RoboCup2027招新群", "n": 18}, {"gid": "567453555", "name": "2027讯飞招新", "n": 18}, {"gid": "874851164", "name": "10.14活动小群", "n": 15}, {"gid": "933645048", "name": "竞赛事务部（浑南）", "n": 15}, {"gid": "852346106", "name": "枫林晚4.1", "n": 14}, {"gid": "323104221", "name": "2026秋雅思口语（浑南）", "n": 13}, {"gid": "341201377", "name": "东北大学科技社团联合行动二群", "n": 11}, {"gid": "964449599", "name": "2026C语言课程群-机器人工程", "n": 10}, {"gid": "873612057", "name": "逆水寒备战（帮派名：道法自然）", "n": 5}, {"gid": "1102988072", "name": "A115656-机器人2601-03具身智能2601生成式授课群", "n": 2}, {"gid": "377418533", "name": "【早安】♥欢聚一堂①", "n": 0}, {"gid": "959056601", "name": "2026 RSE新生群", "n": 0}, {"gid": "809012740", "name": "锤子资源共享4号群", "n": 0}, {"gid": "667014322", "name": "天奕老人群（全员死人）", "n": 0}, {"gid": "576219274", "name": "管理群", "n": 0}, {"gid": "648611508", "name": "樱花の18号学院", "n": 0}, {"gid": "942458006", "name": "天弈：棋圣之路 学习群", "n": 0}, {"gid": "419771496", "name": "仙霄", "n": 0}, {"gid": "747506979", "name": "天奕主题曲", "n": 0}, {"gid": "787302412", "name": "高中数理化学习群", "n": 0}, {"gid": "702901441", "name": "部落冲突交流群", "n": 0}, {"gid": "797756004", "name": "26编程人工智能共享库🧑‍💻", "n": 0}, {"gid": "1062523105", "name": "第十九届学生科协招新群", "n": 0}, {"gid": "935491774", "name": "机器人未来第十届学生会招新群", "n": 0}, {"gid": "544961828", "name": "太空杀", "n": 0}, {"gid": "936833757", "name": "21届大学生话剧团招新群（浑南）", "n": 0}, {"gid": "721191648", "name": "锤子资源共享1号群", "n": 0}], "chosen": ["2940902013", "3252299032"]}, "生成时间": "2026-11-20 12:25"};          // {year, years, files:[...], state:{...}, summary:{...}, groups:{qq:[],chosen:[]}}
+const GUIDE = [{"维度": "德育", "上限": 50, "必选": [{"指标": "参与校、院专题理论学习及重要教育活动", "要A": "活动证明按次记 1 分，年级专业排名进前 80% 记 A（前 30% 才 A+）", "说明": "每次活动都要有证明（指导教师签字），次数越多排名越稳；目标 8~10 次"}, {"指标": "学年班级民主评议结果", "要A": "评议「良好」= A（7 分）；「优秀」= A+（10 分）；「合格」就是 B（5 分）", "说明": "这条是硬门槛：评议只拿到「合格」，整个德育维度直接掉 B"}], "任选": [{"指标": "担任校、院学生干部年度考核", "要A": "考核「良好」及以上记 A（分值按职务 4~9 分）"}, {"指标": "院级以上职业规划大赛获奖", "要A": "参与即 A；获奖按院级 3 / 校级 5 / 省市级 8 / 国家级 10 分"}, {"指标": "见义勇为、助人为乐受院级以上表扬", "要A": "记 A+，加 10 分"}, {"指标": "所在班集体、团支部获评集体荣誉", "要A": "校级以上荣誉 A+ 10 分；团日活动 4/3/2 分；优秀心理班会 3 分"}], "门槛": "大二至少满足 1 项任选，大三/大四至少 2 项"}, {"维度": "智育", "上限": 50, "必选": [{"指标": "学年学业成绩排名", "要A": "无不及格且排名专业前 80% 记 A（7 分）；前 30% 是 A+（10 分）；有不及格直接 C", "说明": "挂一门就废，这条优先级最高"}], "任选": [{"指标": "全国大学英语四六级", "要A": "过四级即 A+（大一 7 / 大二 4 / 大三 2 分）；过六级 10/7/4 分"}, {"指标": "国家计算机等级考试", "要A": "二级及以上通过 A+（二级 7/4/2 分，三级以上 10/7/4 分）"}, {"指标": "参与学术报告、智荟大讲堂等讲座", "要A": "每次 1 分，按排名前 80% 记 A"}], "门槛": "任选至少满足 1 项"}, {"维度": "体育", "上限": 50, "必选": [{"指标": "《国家学生体质健康标准》测试成绩", "要A": "各性别各专业排名前 80% 记 A（前 40% 是 A+）；免测通过记 A", "说明": "这条不计入 300 分，但**计入等级**，掉到 B 一样连累体育维度"}, {"指标": "参加心理健康测评或教育活动", "要A": "完成测评 + 至少 1 次心理健康活动且有证明 = A；只完成测评 = B", "说明": "最容易被忽略：只要参加一次心理班会并留证明，就能从 B 拉到 A"}, {"指标": "参加院级以上体育活动 / 校运动会项目", "要A": "个人参与每次 1 分、代表学院 2 分（参与分不超过 8 分）、代表学校 3 分；按排名前 80% 记 A"}], "任选": [], "门槛": "三项全是必选，没有任选可躲"}, {"维度": "美育", "上限": 50, "必选": [{"指标": "参加院级以上文化艺术类活动/竞赛、代表学校参加艺术展演", "要A": "参与每次 1 分；晚会节目 3 分/个、主持 3 分/场、负责人 +1（同场最高 9 分）；按排名前 80% 记 A", "说明": "只有这一条，掉档整维度掉档"}], "任选": [], "门槛": "单指标维度：多参加、进前 80%"}, {"维度": "劳动教育", "上限": 50, "必选": [{"指标": "寝室建设（每月大清扫、日常清洁）", "要A": "学年检查全部合格 = 基础 7 分记 A；≥2 次优秀 A+ 再加 3 分；有不合格每次 -1，人走不断电 -2，累计扣超 3 分记 B", "说明": "别在安全检查上被抓「人走不断电」，两次就掉 B"}, {"指标": "本科生劳动教育课程（志愿时长）", "要A": "两学期**每学期都 ≥10 小时** = A+（10 分）；只有一学期达标 = A（7 分）；两学期都不够 = B", "说明": "每学期 10 小时是硬线，学期末补齐最稳"}], "任选": [{"指标": "学年志愿服务时长", "要A": "≥40 小时记 A（60 小时 A+）；20 小时起算 2 分，超出每小时 +0.1"}, {"指标": "社会实践活动", "要A": "院级重点团队 = A；校级重点团队 = A+；获奖另计（院级队长 3/队员 2，校级 5/4，省市级 10/9）"}, {"指标": "劳动技能相关资质或证书", "要A": "1 项 = A（4 分），2 项及以上 A+（10 分）"}, {"指标": "专利（著作权）授权", "要A": "发明 10/受理 3，实用新型 6/2，外观 4/1；非第一作者按 0.8/0.6/0.4/0.2 系数"}], "门槛": "任选至少满足 1 项"}, {"维度": "创新实践", "上限": 50, "必选": [], "任选": [{"指标": "参加星级分类表内的高水平双创竞赛", "要A": "参赛即 A；获奖按等级：院级/一星一等 5、二等 4、三等 3.5；二三四星及五星国家级以下 一等 8/二等 7/三等 6.5；五星国家级 一等 10/二等 9/三等 8.5", "说明": "主力队员认定：≤7 人取前 3、<3 人全员、>7 人取前 50% 且最多 7 人；非主力按 50%"}, {"指标": "创意节、科普节、科技节、创业节", "要A": "参赛即 A；获奖一等 5/二等 4/三等 3.5"}, {"指标": "大学生创新创业训练计划", "要A": "立项/中期：国家级 4 分、省级 3、校级 2、未通过 1；结题：优秀 6、良好 5、合格 4.5"}, {"指标": "高水平论文/成果（第一单位东北大学）", "要A": "SCI 一区 9/二区 8/三区 7/四区 6；EI 5；CCF A 9/B 8/C 7；IROS 8；其他国际会议 5；国内一级学会 3、二级 2；核心 3"}], "门槛": "任选至少满足 1 项（这个维度没有必选项，最容易补）"}];
+const YEAR = "2026-2027";             // 当前学年（服务端判定）
+let curYear = Z.year || YEAR;
+let filter = "all";
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("on");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 2200); }
+
+async function api(path, body){
+  const r = await fetch(path, body ? {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)} : {});
+  return await r.json();
+}
+
+// ---------- 学年 ----------
+function renderYears(){
+  const bar = $("yearbar");
+  bar.innerHTML = (Z.years || []).map(y =>
+    `<a href="?year=${encodeURIComponent(y)}" class="${y === curYear ? "on" : ""}">${y}</a>`).join("");
+  $("yearnow").textContent = curYear;
+}
+
+// ---------- 六维攻略 ----------
+function renderDims(){
+  const sum = Z.summary || {}, per = sum["维度"] || {};
+  $("allastate").textContent = sum["六维是否可判全A"] || "待评估";
+  $("allastate").className = "pill " + (String(sum["六维是否可判全A"] || "").indexOf("材料齐") >= 0 ? "green" : "amber");
+  $("dims").innerHTML = GUIDE.map(g => {
+    const v = per[g["维度"]] || {分:0, 上限:g["上限"], 已算分项:0, 待排名:0, 待人工:0, 提示:[]};
+    const pct = Math.min(100, Math.round((v.分 || 0) / (g["上限"] || 50) * 100));
+    const bl = (g["必选"] || []).map(x =>
+      `<li><b>★ ${esc(x["指标"])}</b><div class="lab">要 A：${esc(x["要A"])}</div></li>`).join("");
+    const op = (g["任选"] || []).map(x =>
+      `<li>☆ ${esc(x["指标"])}<div class="lab">要 A：${esc(x["要A"])}</div></li>`).join("");
+    const tip = (v.提示 && v.提示.length) ? `<div class="lab" style="margin-top:6px;color:#b45309">还差：${v.提示.slice(0,3).map(esc).join("；")}</div>` : "";
+    return `<div class="dim">
+      <h3><span>${esc(g["维度"])} <span class="pill">上限 ${g["上限"]}</span></span>
+        <span class="score">${v.分 || 0}/${g["上限"]}</span></h3>
+      <div style="height:5px;background:#e5eaf1;border-radius:9px;overflow:hidden;margin:2px 0 6px">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#60a5fa,#1d4ed8)"></div></div>
+      <div class="lab">已算分 ${v.已算分项 || 0} 项 · 待排名 ${v.待排名 || 0} · 待人工 ${v.待人工 || 0}
+        ${g["门槛"] ? " · " + esc(g["门槛"]) : ""}</div>
+      <ul>${bl}${op}</ul>${tip}
+    </div>`;
+  }).join("");
+}
+
+// ---------- 附件 ----------
+function itemState(it){
+  const st = (Z.state || {})[it._key] || {};
+  return st["状态"] || "待确认";
+}
+function renderFiles(){
+  const box = $("files");
+  let list = (Z.files || []).slice();
+  if (filter === "strong") list = list.filter(x => x["强关键词"]);
+  else if (filter === "me") list = list.filter(x => x["本人名"]);
+  else if (filter === "file") list = list.filter(x => x["类型"] === "文件");
+  else if (filter === "img") list = list.filter(x => x["类型"] === "图片");
+  else if (filter === "cached") list = list.filter(x => x["缓存"]);
+  else if (filter === "pending") list = list.filter(x => itemState(x) === "待确认");
+
+  $("pendcount").textContent = (Z.files || []).filter(x => itemState(x) === "待确认").length + " 条待确认";
+
+  if (!list.length){ box.innerHTML = '<div class="empty">这个筛选下没有条目。</div>'; return; }
+  box.innerHTML = list.map(it => {
+    const st = itemState(it);
+    const cls = st === "有章" ? "item done" : "item";
+    const thumb = (it["类型"] === "图片" && it["缓存"])
+      ? `<img class="thumb" src="/api/zongce/file?p=${encodeURIComponent(it["缓存"])}" loading="lazy" alt="">`
+      : `<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:11px">${it["类型"] === "图片" ? "图片" : "文件"}</div>`;
+    const cand = it["缓存"] ? `<a class="btn" href="/api/zongce/file?p=${encodeURIComponent(it["缓存"])}" target="_blank">打开</a>` : `<span class="pill amber">未缓存（要下载）</span>`;
+    const badge = st === "有章" ? '<span class="pill green">有章 ✓ 已归档</span>'
+      : st === "无章" ? '<span class="pill">已标无章</span>'
+      : st === "忽略" ? '<span class="pill">已忽略</span>' : '<span class="pill amber">待确认</span>';
+    return `<div class="${cls}" data-key="${esc(it._key)}">
+      ${thumb}
+      <div class="body">
+        <div class="name">${esc(it["文件名"])} ${badge}</div>
+        <div class="meta">${esc(it["群名"])} · ${esc(it["时间"])} · ${esc(it["类型"])}${it["发送者"] ? " · " + esc(it["发送者"]) : ""}</div>
+        <div class="acts">
+          ${cand}
+          <button class="btn ok" data-act="有章">有章 ✓</button>
+          <button class="btn warn" data-act="无章">无章</button>
+          <button class="btn ghost" data-act="忽略">忽略</button>
+          ${st === "有章" ? `<button class="btn" data-act="done">${it._完成 ? "↩ 取消完成" : "✓ 已完成"}</button>
+            <button class="btn ghost" data-act="manual">手动定级</button>` : ""}
+        </div>
+      </div></div>`;
+  }).join("");
+}
+
+async function act(key, verdict){
+  const r = await api("/api/zongce/confirm", {key, verdict, year: curYear});
+  if (!r.ok){ toast("失败：" + (r.err || "")); return; }
+  Z.state[key] = Object.assign(Z.state[key] || {}, {状态: verdict});
+  renderFiles();
+  toast(verdict === "有章" ? "已归到「有盖章」并计入算分" : "已标记「" + verdict + "」");
+  if (r.data){ Z.files = r.data.files || Z.files; Z.summary = r.data.summary || Z.summary; renderDims(); renderSum(); }
+}
+
+// ---------- 算分 ----------
+function renderSum(){
+  const sum = Z.summary || {}, per = sum["维度"] || {};
+  const rows = (GUIDE || []).map(g => {
+    const v = per[g["维度"]] || {};
+    return `<tr><td>${esc(g["维度"])}</td><td>${v.分 || 0} / ${g["上限"]}</td>
+      <td>${v.已算分项 || 0}</td><td>${v.待排名 || 0}</td><td>${v.待人工 || 0}</td></tr>`;
+  }).join("");
+  $("sumtable").innerHTML = `<tr><th>维度</th><th>自评分</th><th>已算分项</th><th>待排名</th><th>待人工</th></tr>${rows}`;
+  $("total").textContent = "自评总分 " + (sum["总分自评"] || 0) + " / 300";
+  const wait = (sum["待排名"] || []).length + (sum["待人工"] || []).length;
+  $("sumhint").textContent = wait
+    ? "还有 " + wait + " 项需要排名或人工定级（排名类要等学院公布年级专业排名，不能瞎猜）。"
+    : "目前所有已确认材料都能算出绝对分。";
+}
+
+// ---------- 上传 ----------
+$("btnupload").onclick = async () => {
+  const files = Array.from($("fileinput").files || []);
+  if (!files.length){ toast("先选文件"); return; }
+  for (const f of files){
+    const b64 = await new Promise((res, rej) => {
+      const fr = new FileReader();
+      fr.onload = () => res(String(fr.result).split(",")[1] || "");
+      fr.onerror = rej;
+      fr.readAsDataURL(f);
+    });
+    const r = await api("/api/zongce/upload", {name: f.name, data: b64, year: curYear});
+    if (!r.ok) { toast("上传失败：" + (r.err || "")); continue; }
+    toast("已保存：" + f.name);
+  }
+  const d = await api("/api/zongce/data?year=" + encodeURIComponent(curYear));
+  if (d.ok){ Z.files = d.files; Z.state = d.state; Z.summary = d.summary; renderFiles(); renderDims(); renderSum(); }
+};
+
+// ---------- 独立抽群 ----------
+function renderGroups(){
+  const qq = (Z.groups && Z.groups.qq) || [];
+  const chosen = (Z.groups && Z.groups.chosen) || [];
+  const set = new Set(chosen);
+  $("gcount").textContent = chosen.length + " / " + qq.length + " 个群";
+  $("glist").innerHTML = qq.map(g =>
+    `<label><input type="checkbox" value="${esc(g.gid)}" ${set.has(g.gid) ? "checked" : ""}>
+      <span>${esc(g.name || ("群 " + g.gid))}</span>
+      <span class="pill" style="margin-left:auto">${g.n || 0} 条</span>
+      ${String(g.name || "").indexOf("群 ") === 0 ? `<span class="btn ghost" data-ren="${esc(g.gid)}" style="padding:0 6px">✏️ 命名</span>` : ""}
+    </label>`).join("")
+    || '<div class="empty">没有可选的群（先跑一次更新消息）</div>';
+}
+$("btngroups").onclick = () => { renderGroups(); $("gmask").classList.add("on"); };
+$("gclose").onclick = () => $("gmask").classList.remove("on");
+$("gall").onclick = () => document.querySelectorAll("#glist input").forEach(x => x.checked = true);
+$("gnone").onclick = () => document.querySelectorAll("#glist input").forEach(x => x.checked = false);
+$("gsave").onclick = async () => {
+  const codes = Array.from(document.querySelectorAll("#glist input:checked")).map(x => x.value);
+  const r = await api("/api/zongce/groups", {codes});
+  if (!r.ok){ toast("保存失败：" + (r.err || "")); return; }
+  Z.groups.chosen = codes; renderGroups(); $("gmask").classList.remove("on"); toast("已保存抽取群：" + codes.length + " 个");
+};
+
+// ---------- 扫描 ----------
+$("btnscan").onclick = async (ev) => {
+  const b = ev.target; b.disabled = true; b.textContent = "扫描中…";
+  const r = await api("/api/zongce/scan", {year: curYear});
+  b.disabled = false; b.textContent = "🔄 重新扫描";
+  if (!r.ok){ toast("扫描失败：" + (r.err || "")); return; }
+  const d = await api("/api/zongce/data?year=" + encodeURIComponent(curYear));
+  if (d.ok){ Z.files = d.files; Z.state = d.state; Z.summary = d.summary; renderFiles(); renderDims(); renderSum(); }
+  toast("扫描完成：" + ((r.data && r.data.total) || 0) + " 条相关附件");
+};
+
+// ---------- 筛选 ----------
+function renderFilters(){
+  const defs = [["all","全部"],["pending","待确认"],["strong","强相关"],["me","含本人名"],["file","文件"],["img","图片"],["cached","已缓存"]];
+  $("filters").innerHTML = defs.map(([k, t]) =>
+    `<span class="chip ${filter === k ? "on" : ""}" data-f="${k}">${t}</span>`).join("");
+  document.querySelectorAll("#filters .chip").forEach(el => el.onclick = () => {
+    filter = el.dataset.f; renderFilters(); renderFiles();
+  });
+}
+
+function itemKey(el){
+  const box = el.closest(".item");
+  return box ? box.getAttribute("data-key") : "";
+}
+
+async function toggleDone(key, done){
+  const r = await api("/api/zongce/done", {key, done});
+  if (!r.ok){ toast("失败：" + (r.err || "")); return; }
+  const st = Z.state[key] = Z.state[key] || {};
+  st["已完成"] = done;
+  renderFiles();
+  toast(done ? "已打勾完成" : "已取消完成");
+}
+
+async function manual(key){
+  const it = (Z.files || []).find(x => x._key === key) || {};
+  const cur = it.算分 || {};
+  const dims = (GUIDE || []).map(g => g["维度"]);
+  const dim = prompt("这条材料算哪个维度？（" + dims.join(" / ") + "）", cur.维度 || "");
+  if (dim == null) return;
+  const ind = prompt("指标名称（例：志愿服务时长 / 创新创业竞赛）", cur.指标 || "");
+  if (ind == null) return;
+  const sc = prompt("给多少分（只填数字；要靠年级排名定等级的就填 0）", String(cur.分 || 0));
+  if (sc == null) return;
+  const wait = confirm("这一项要等年级排名才能定等级吗？确定 = 标记「待排名」；取消 = 现在就按绝对分算");
+  const r = await api("/api/zongce/manual",
+    {key, 维度: dim, 指标: ind, 分: Number(sc) || 0, 等级: "", 说明: "手动定级", 待排名: wait});
+  if (!r.ok){ toast("失败：" + (r.err || "")); return; }
+  const d = await api("/api/zongce/data?year=" + encodeURIComponent(curYear));
+  if (d.ok){ Z.files = d.files; Z.state = d.state; Z.summary = d.summary; renderFiles(); renderDims(); renderSum(); }
+  toast("已保存手动定级");
+}
+
+document.addEventListener("click", async (e) => {
+  const ren = e.target.closest("[data-ren]");
+  if (ren){
+    const gid = ren.getAttribute("data-ren");
+    const one = ((Z.groups && Z.groups.qq) || []).find(g => String(g.gid) === String(gid)) || {};
+    const name = prompt("给这个群起个名字（留空 = 清除）", one.name || "");
+    if (name == null) return;
+    const r = await api("/api/zongce/rename", {gid, name: name.trim(), year: curYear});
+    if (!r.ok){ toast("失败：" + (r.err || "")); return; }
+    const d = await api("/api/zongce/data?year=" + encodeURIComponent(curYear));
+    if (d.ok){ Z.groups = d.groups; Z.files = d.files; Z.state = d.state; renderGroups(); renderFiles(); }
+    toast(name.trim() ? "群名已保存" : "群名已清除");
+    return;
+  }
+  const b = e.target.closest("button[data-act]");
+  if (!b) return;
+  const key = itemKey(b);
+  const a = b.getAttribute("data-act");
+  if (a === "done"){
+    const ent = Z.state[key] || {};
+    await toggleDone(key, !ent["已完成"]);
+  } else if (a === "manual"){
+    await manual(key);
+  } else {
+    act(key, a);
+  }
+});
+
+// 云端（GitHub Pages）是纯静态副本：没有后端，按钮点了也不会有结果 → 直接说明白
+function isLocalPanel(){
+  const h = (location.hostname || "").toLowerCase();
+  if (!h || h === "localhost") return true;
+  if (/^127\./.test(h)) return true;
+  if (/^(192\.168|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(h)) return true;
+  if (/^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./.test(h)) return true;   // Tailscale
+  return false;
+}
+if (!isLocalPanel()){
+  const n = document.createElement("div");
+  n.className = "card";
+  n.style.background = "#fff7ed";
+  n.style.borderColor = "#fdba74";
+  n.innerHTML = "<b>☁️ 这是云端副本</b>：只能看，确认/上传/扫描都要在电脑上的面板里做"
+    + "（http://127.0.0.1:8765/综测评定.html 或 Tailscale 地址）。";
+  document.querySelector(".wrap").insertBefore(n, document.querySelector(".card"));
+  document.querySelectorAll("button").forEach(b => { if (b.id !== "gclose") b.disabled = true; });
+}
+
+renderYears(); renderFilters(); renderDims(); renderFiles(); renderSum(); renderGroups();
+</script>
+</body></html>
