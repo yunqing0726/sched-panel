@@ -297,7 +297,7 @@ th{color:var(--sub);font-weight:600}
   function post(url, obj){
     return fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(obj||{})}).then(function(r){return r.json();});
   }
-  function card(p){
+  function card(p,i,total){
     var badge=p.running
       ? '<span style="color:#16a34a;font-weight:600">● 运行中　pid '+p.pid+'</span>'
       : '<span style="color:#9ca3af;font-weight:600">● 已停止</span>';
@@ -309,9 +309,12 @@ th{color:var(--sub);font-weight:600}
     var sum=(p.plan_summary||[]);
     var tail=(p.log_tail||[]).map(esc).join("\n");
     var last=(p.last_result||"").replace(/^\[[^\]]*\]\s*/,"").slice(0,120);
-    return '<div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin:14px 0;background:#fff">'
+    var accent=p.running?'#16a34a':'#94a3b8';
+    var idx=(typeof i==="number"&&typeof total==="number")?(i+1)+' / '+total:'';
+    return '<div style="border:1px solid #e5e7eb;border-top:5px solid '+accent+';border-radius:12px;padding:16px;margin:0 0 6px;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.06)">'
+      + '<div class="hint" style="font-size:11.5px;color:#94a3b8;letter-spacing:.04em;margin-bottom:4px">插件 '+idx+'</div>'
       + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
-      +   '<b style="font-size:16px">'+esc(p.name)+'</b>'+badge+'</div>'
+      +   '<b style="font-size:17px">'+esc(p.name)+'</b>'+badge+'</div>'
       + '<div class="hint" style="margin:6px 0">'+esc(p.desc)+'</div>'
       + '<div class="hint">'+(p.id==="mooc"?"待互评：":"最近收到推文：")+'<b>'+esc(p.last_article||"—")+'</b>　'+(p.id==="mooc"?"登录状态：":"资料完整：")+(p.profile_ok?'✅':'⚠️ 需要登录/补资料')+'</div>'
       + '<div class="hint">最近结果：'+esc(last||"—")+'</div>'
@@ -339,7 +342,13 @@ th{color:var(--sub);font-weight:600}
       var j=await (await fetch("/api/auto")).json();
       if(!j.ok){ box.innerHTML='<div class="hint">读不到：'+esc(j.err||"")+'</div>'; return; }
       var ps=j.plugins||[];
-      box.innerHTML = ps.length ? ps.map(card).join("") : '<div class="hint">还没有插件</div>';
+      var SEP='<div style="display:flex;align-items:center;gap:10px;margin:26px 0 22px">'
+        + '<div style="flex:1;height:2px;background:#e2e8f0"></div>'
+        + '<span style="font-size:11.5px;color:#94a3b8;letter-spacing:.08em">下一个插件</span>'
+        + '<div style="flex:1;height:2px;background:#e2e8f0"></div></div>';
+      box.innerHTML = ps.length
+        ? ps.map(function(p,i){ return (i? SEP : '') + card(p, i, ps.length); }).join("")
+        : '<div class="hint">还没有插件</div>';
       box.querySelectorAll("button[data-act]").forEach(function(b){
         b.addEventListener("click", async function(){
           b.textContent="处理中…";
