@@ -302,6 +302,10 @@ th{color:var(--sub);font-weight:600}
       ? '<span style="color:#16a34a;font-weight:600">● 运行中　pid '+p.pid+'</span>'
       : '<span style="color:#9ca3af;font-weight:600">● 已停止</span>';
     var u=p.usage||{};
+    var labels=p.usage_labels||{runs:"推文",forms:"表单",submits:"提交"};
+    var usageLine=Object.keys(labels).map(function(k){
+      return labels[k]+" <b>"+(u[k]||0)+"</b> 次";
+    }).join("　");
     var sum=(p.plan_summary||[]);
     var tail=(p.log_tail||[]).map(esc).join("\n");
     var last=(p.last_result||"").replace(/^\[[^\]]*\]\s*/,"").slice(0,120);
@@ -309,18 +313,20 @@ th{color:var(--sub);font-weight:600}
       + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
       +   '<b style="font-size:16px">'+esc(p.name)+'</b>'+badge+'</div>'
       + '<div class="hint" style="margin:6px 0">'+esc(p.desc)+'</div>'
-      + '<div class="hint">最近收到推文：<b>'+esc(p.last_article||"—")+'</b>　资料完整：'+(p.profile_ok?'✅':'⚠️ 缺手机号/QQ')+'</div>'
+      + '<div class="hint">'+(p.id==="mooc"?"待互评：":"最近收到推文：")+'<b>'+esc(p.last_article||"—")+'</b>　'+(p.id==="mooc"?"登录状态：":"资料完整：")+(p.profile_ok?'✅':'⚠️ 需要登录/补资料')+'</div>'
       + '<div class="hint">最近结果：'+esc(last||"—")+'</div>'
       + '<div class="hint" style="margin-top:10px;padding:8px;background:#f8fafc;border-radius:8px">'
-      +   '本插件独立计量：推文 <b>'+(u.runs||0)+'</b> 次　表单 <b>'+(u.forms||0)+'</b> 次　提交 <b>'+(u.submits||0)+'</b> 次　费用 <b>'+money(u.cost)+'</b>'
+      +   '本插件独立计量：'+usageLine+'　费用 <b>'+money(u.cost)+'</b>'
       +   ' <button class="btn" data-reset="'+esc(p.id)+'" style="margin-left:8px;padding:1px 8px;font-size:12px">清零</button></div>'
       + '<div style="margin-top:10px;border-top:1px dashed #e5e7eb;padding-top:10px">'
-      +   '<div class="hint" style="font-weight:600;color:#111">📝 下周时间安排（直接打字，一行一条）</div>'
-      +   '<div class="hint">例如：<code>下周三下午没空</code>　<code>11月26日 13:00-18:30 有事</code>　<code>每周六上午有课</code></div>'
-      +   '<textarea data-plan="'+esc(p.id)+'" spellcheck="false" style="width:100%;min-height:88px;margin:6px 0;padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-family:inherit">'+esc(p.plan_text||"")+'</textarea>'
-      +   '<div><button class="btn btn-primary" data-save="'+esc(p.id)+'">保存</button> '
-      +     '<span class="hint">'+(p.plan_saved_at?('已保存 '+esc(p.plan_saved_at)):'还没填')+(sum.length?('　已识别：'+sum.map(esc).join('；')):'')+'</span></div>'
-      + '</div>'
+      + (p.plan_text!==undefined ? (
+          '<div class="hint" style="font-weight:600;color:#111">📝 下周时间安排（直接打字，一行一条）</div>'
+        + '<div class="hint">例如：<code>下周三下午没空</code>　<code>11月26日 13:00-18:30 有事</code>　<code>每周六上午有课</code></div>'
+        + '<textarea data-plan="'+esc(p.id)+'" spellcheck="false" style="width:100%;min-height:88px;margin:6px 0;padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-family:inherit">'+esc(p.plan_text||"")+'</textarea>'
+        + '<div><button class="btn btn-primary" data-save="'+esc(p.id)+'">保存</button> '
+        +   '<span class="hint">'+(p.plan_saved_at?('已保存 '+esc(p.plan_saved_at)):'还没填')+(sum.length?('　已识别：'+sum.map(esc).join('；')):'')+'</span></div>'
+        + '<div style="height:8px"></div>'
+        ) : '')
       + '<pre style="background:#f9fafb;border:1px solid #f1f5f9;border-radius:8px;padding:8px;max-height:130px;overflow:auto;font-size:12px;margin:8px 0;white-space:pre-wrap">'+tail+'</pre>'
       + '<div><button class="btn btn-primary" data-act="start" data-id="'+esc(p.id)+'"'+(p.running?" disabled":"")+'>▶ 启动</button> '
       + '<button class="btn" data-act="stop" data-id="'+esc(p.id)+'"'+(p.running?"":" disabled")+'>⏹ 停止</button></div>'
