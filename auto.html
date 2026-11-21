@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>自动化插件</title><style>
+:root{--bg:#f5f6f8;--card:#fff;--line:#e3e5e9;--txt:#1c1e21;--sub:#6b7280;--blue:#2f6fed;--green:#16a34a;--red:#dc2626;--amber:#d97706}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--txt)}
+.wrap{max-width:980px;margin:0 auto;padding:22px 16px 80px}
+h1{font-size:22px;margin:0 0 4px}
+.meta{color:var(--sub);font-size:13px;margin-bottom:16px}
+.stats{display:flex;gap:10px;margin:14px 0 18px;flex-wrap:wrap}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:110px}
+.stat b{display:block;font-size:20px}
+.stat span{color:var(--sub);font-size:12px}
+/* 慕课待交清单：置顶高亮区块（快截止红底、还早的橙底） */
+.urgent{margin:0 0 16px;border:2px solid #dc2626;background:#fef2f2;border-radius:10px;padding:12px 14px}
+.urgent.warm{border-color:#f59e0b;background:#fffbeb}
+.urgent .uh{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#b91c1c;margin-bottom:8px}
+.urgent.warm .uh{color:#b45309}
+.urgent .uh .n2{background:#dc2626;color:#fff;border-radius:10px;padding:1px 8px;font-size:12px;font-weight:400}
+.urgent.warm .uh .n2{background:#f59e0b}
+.urgent .ui{display:flex;flex-wrap:wrap;gap:3px 10px;align-items:baseline;padding:7px 0;border-top:1px dashed #fca5a5;font-size:13px}
+.urgent.warm .ui{border-top-color:#fcd34d}
+.urgent .ui:first-of-type{border-top:0;padding-top:0}
+.urgent .ui .nm{font-weight:600;color:#7f1d1d}
+.urgent.warm .ui .nm{color:#78350f}
+.urgent .ui .co{color:#9a3412;background:#ffedd5;border-radius:5px;padding:0 6px;font-size:11.5px}
+.urgent .ui .dl{color:#b91c1c;font-weight:600}
+.urgent .ui .lf{color:#fff;background:#dc2626;border-radius:6px;padding:1px 7px;font-size:11.5px}
+.urgent .ui .lf.soon{background:#f59e0b}
+.urgent .ui .st{color:#b91c1c;font-size:11.5px}
+/* 慕课成绩箱：已交条目（含分数、互评/自评状态）。置顶只显示未交，成绩得单独有一块 */
+.scorebox{border:2px solid #0ea5e9;background:#f0f9ff}
+.scorebox .uh{color:#0369a1}
+.scorebox .uh .n2{background:#0284c7}
+.scorebox .ui{border-top-color:#7dd3fc}
+.scorebox .ui .nm{color:#0c4a6e}
+.scorebox .ui .co{color:#075985;background:#e0f2fe}
+.scorebox .ui .dl{color:#0369a1;font-weight:400}
+.scorebox .ui .sc{color:#fff;background:#0284c7;border-radius:6px;padding:1px 7px;font-size:12px;font-weight:600}
+.urgent .ui .ev{color:#0f766e;background:#ccfbf1;border-radius:5px;padding:0 6px;font-size:11.5px}
+.urgent .ui .ev.warn{color:#b45309;background:#fef3c7}
+.scorebox .ui .st{color:#0369a1}
+.item.urgent-item{background:#fff1f2;border-color:#f87171;border-left:4px solid #dc2626;padding-left:10px}
+.toolbar{display:flex;gap:8px;align-items:center;margin:0 0 14px;flex-wrap:wrap}
+.btn.btn-primary{background:#2563eb;color:#fff;border-color:#2563eb}
+.btn.btn-primary:hover{background:#1d4ed8}
+.mask{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:50;align-items:center;justify-content:center;padding:16px}
+.mask.on{display:flex}
+.modal{background:#fff;border-radius:12px;max-width:640px;width:100%;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.mh{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);font-size:16px}
+.mx{cursor:pointer;color:#94a3b8;padding:0 4px}
+.mb{padding:14px 16px;overflow:auto;font-size:14px;line-height:1.7}
+.mf{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+/* 黑名单编辑窗口：默认弹窗太窄，编辑 md 要能一眼看到一屏 */
+#bmask .modal{max-width:1080px;width:96vw;max-height:92vh}
+#bmask .mb{overflow:hidden;display:flex;flex-direction:column;gap:10px}
+#b-text{width:100%;height:min(58vh,620px);box-sizing:border-box;padding:12px 14px;border:1px solid var(--line);
+  border-radius:8px;font-family:Consolas,"Cascadia Mono",monospace;font-size:13.5px;line-height:1.65;
+  resize:vertical;background:#fcfdff;min-height:220px}
+#b-text:focus{outline:2px solid #bfdbfe;border-color:var(--blue)}
+/* 新建日程表单 */
+#nmask .modal{max-width:640px}
+#nmask .mb{display:flex;flex-direction:column;gap:6px}
+#nmask .fl{font-size:13px;color:#334155;font-weight:600;margin-top:6px}
+#nmask .req{color:#dc2626;font-weight:400}
+#nmask .opt{color:var(--sub);font-weight:400}
+#nmask input,#nmask textarea{width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--line);
+  border-radius:8px;font:inherit;font-size:14px;background:#fcfdff}
+#nmask input:focus,#nmask textarea:focus{outline:2px solid #bfdbfe;border-color:var(--blue)}
+#nmask textarea{resize:vertical;line-height:1.6}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 4px}
+.btn.btn-mini{padding:4px 10px;font-size:12.5px;border-radius:6px;color:#475569}
+/* 截止时间：自绘日历（点开就是一个月历，能翻月份、点日期、再选时间） */
+.duewrap{display:flex;gap:6px;align-items:center}
+.duewrap #n-due-show{flex:1;min-width:0;font-size:14px;padding:9px 12px;cursor:pointer;background:#fcfdff}
+#n-duehint{margin-top:-2px}
+.cal{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;margin:2px 0 4px;
+  box-shadow:0 8px 24px rgba(15,23,42,.08)}
+.cal .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal .ch b{font-size:14px}
+.cal .cn{border:1px solid var(--line);background:#fff;border-radius:6px;padding:2px 9px;cursor:pointer;
+  font:inherit;font-size:13px;color:#475569}
+.cal .cn:hover{border-color:var(--blue);color:var(--blue)}
+.cal .cw,.cal .cg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .cw span{text-align:center;font-size:12px;color:var(--sub);padding:2px 0}
+.cal .cd{border:0;background:transparent;border-radius:6px;padding:6px 0;font:inherit;font-size:13px;
+  cursor:pointer;color:#1f2937}
+.cal .cd:hover{background:#eef2ff}
+.cal .cd.out{color:#cbd5e1;cursor:default}
+.cal .cd.out:hover{background:transparent}
+.cal .cd.today{outline:1px dashed #93c5fd}
+.cal .cd.sel{background:var(--blue);color:#fff;font-weight:600}
+.cal .ct{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid var(--line);
+  flex-wrap:wrap}
+.cal .ct select{padding:5px 8px;border:1px solid var(--line);border-radius:6px;font:inherit;font-size:13px}
+.cal .ct .btn-mini{padding:4px 8px}
+/* 抽取哪些群 */
+.newbar{margin:8px 0 2px;padding:9px 12px;border:1px solid #f0c36d;background:#fff8e6;border-radius:9px;
+  font-size:13.5px;color:#7a4b00;cursor:pointer;display:flex;align-items:center;gap:8px}
+.newbar b{color:#b45309}
+.newbar .nb-go{margin-left:auto;padding:4px 12px;border-radius:7px;background:#f59e0b;color:#fff;font-weight:600}
+#gmask .modal{max-width:820px;width:96vw}
+#gmask .mb{display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.glist{max-height:56vh;overflow:auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+.gsec{position:sticky;top:0;background:#f1f5f9;color:#334155;font-size:12.5px;font-weight:600;
+  padding:5px 10px;border-bottom:1px solid var(--line);z-index:1}
+.grow{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid #f1f5f9;cursor:pointer}
+.grow:hover{background:#f8fafc}
+.grow input{width:15px;height:15px;flex:0 0 auto;cursor:pointer;accent-color:var(--blue)}
+.grow .gname{flex:1;min-width:0;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grow .gsub{flex:0 0 auto;font-size:11.5px;color:var(--sub);font-variant-numeric:tabular-nums}
+.grow.off .gname{color:#94a3b8}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0 0 12px}
+.steps li{counter-increment:s;padding-left:26px;position:relative;margin-bottom:8px}
+.steps li:before{content:counter(s);position:absolute;left:0;top:1px;width:18px;height:18px;border-radius:50%;background:#e0e7ff;color:#3730a3;font-size:11px;text-align:center;line-height:18px}
+.log{background:#0f172a;color:#cbd5e1;font-family:Consolas,monospace;font-size:12px;line-height:1.6;padding:10px;border-radius:8px;max-height:240px;overflow:auto;white-space:pre-wrap}
+.log b{color:#7dd3fc}
+.hint{color:var(--sub);font-size:13px}
+code.cmd{background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:12px;word-break:break-all}
+@media (max-width:700px){
+ .mask{padding:8px}
+ .modal{max-height:92vh}
+}
+.toolbar input{flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;font:inherit}
+.btn{padding:8px 14px;border:1px solid var(--line);background:var(--card);border-radius:8px;cursor:pointer;font:inherit}
+.btn:hover{border-color:var(--blue);color:var(--blue)}
+h2{font-size:16px;margin:26px 0 10px;display:flex;align-items:center;gap:8px}
+h2 .cnt{background:#e8ecf5;color:#3559a8;border-radius:20px;padding:1px 9px;font-size:12px;font-weight:600}
+.item{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.item:hover{border-color:#c9d3e8}
+/* 互评条目：整行淡青色背景 + 左侧色条，一眼能在列表里挑出来 */
+.item.peer{background:#e8fbf7;border-color:#7fd8cd;border-left:4px solid #0d9488;padding-left:10px}
+.item.peer:hover{border-color:#4fc3b5}
+.item.peer.done{background:#f3f7f6;border-left-color:#b6c9c6}
+.item input[type=checkbox]{width:18px;height:18px;margin-top:3px;cursor:pointer;flex:none}
+.body{flex:1;min-width:0}
+.t{font-weight:600;word-break:break-word}
+.sub{color:var(--sub);font-size:12.5px;margin-top:3px;display:flex;gap:10px;flex-wrap:wrap}
+.tag{display:inline-block;border-radius:6px;padding:0 6px;font-size:11.5px;line-height:19px;background:#eef2f9;color:#3b5ba5}
+.tag.due{background:#fdecec;color:var(--red)}
+.tag.today{background:#fff4e5;color:var(--amber)}
+.tag.week{background:#e8f5ec;color:var(--green)}
+.tag.rep{background:#f3e8ff;color:#6d28d9}
+.tag.new{background:#dbeafe;color:#1d4ed8;font-weight:600}
+.tag.watch{background:#fde68a;color:#92400e;font-weight:600}
+.tag.soon{background:#e0f2fe;color:#0369a1}
+.tag.overdue{background:#fee2e2;color:#b91c1c}
+.tag.star{background:#fef3c7;color:#b45309;font-weight:700;font-size:13px;padding:0 5px}
+.sendergray{color:#94a3b8;font-size:11.5px}
+.tag.warnx{background:#fef3c7;color:#b45309}
+.gt-sel{font-size:12px;padding:2px 4px;border:1px solid var(--line);border-radius:6px;background:#fff;color:#334155}
+.gt-name{font-size:12px;padding:3px 6px;width:130px;border:1px solid var(--line);border-radius:6px}
+.gt-color{width:26px;height:22px;padding:0;border:1px solid var(--line);border-radius:6px;background:#fff;vertical-align:middle;cursor:pointer}
+.gt-clear{display:inline-block;vertical-align:middle;margin-left:4px;width:16px;height:16px;line-height:14px;text-align:center;border-radius:50%;background:#e2e8f0;color:#475569;cursor:pointer;font-size:12px}
+.gt-clear:hover{background:#fecaca;color:#b91c1c}
+.gt-orig{color:#94a3b8;font-size:12px;margin-left:4px}
+#gtag-body,#clue-body{overflow-x:auto}
+@media (max-width:700px){
+ body{padding:0}
+ .wrap{padding:14px 10px 64px}
+ h1{font-size:20px;margin:0 0 2px}
+ /* 四个统计压成一行小卡：手机上原来 2×2 占掉大半屏 */
+ .stats{gap:6px;margin:10px 0 12px;flex-wrap:nowrap}
+ .stat{flex:1 1 0;min-width:0;padding:7px 4px;border-radius:8px;text-align:center}
+ .stat b{font-size:17px;line-height:1.25}
+ .stat span{font-size:10px;line-height:1.3;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ /* 头部元信息压成小字，别占 5 行 */
+ .meta{font-size:11.5px;line-height:1.55;margin-bottom:8px}
+ /* 用量条与小提示 */
+ .paidbar{font-size:11.5px;padding:6px 9px;line-height:1.5;gap:6px;margin:6px 0}
+ #checkbar{margin:6px 8px;padding:6px 9px;font-size:12px;line-height:1.55}
+ /* 置顶区块标题原来挤成一团换行 */
+ .urgent{padding:10px 11px;margin:0 0 12px}
+ .urgent .uh{flex-wrap:wrap;gap:3px 6px;font-size:13px;margin-bottom:6px}
+ .urgent .ui{font-size:12.5px;gap:2px 6px;padding:6px 0}
+ /* 工具栏：搜索框独占一行，按钮小一号 */
+ .toolbar{gap:6px;margin:0 0 10px}
+ .toolbar input{flex:1 1 100%;min-width:0;font-size:13px;padding:7px 10px}
+ .btn,button{font-size:12.5px;padding:6px 9px}
+ .viewbar{width:100%;margin:8px 0 4px}
+ .viewbar a{flex:1 1 0;text-align:center;font-size:12.5px;padding:7px 4px}
+ .platbar{font-size:11.5px;gap:5px;margin:6px 0 2px}
+ .platbar .pill,.platbar a{font-size:11.5px;padding:2px 7px}
+ /* 条目 */
+ .item{padding:10px}
+ .t{font-size:15px}
+ .row{flex-wrap:wrap;gap:3px 6px}
+ /* 「最近运行结果」里的表格原来 669px 宽会撑破屏幕 */
+ table{font-size:12px;white-space:nowrap;display:block;overflow-x:auto}
+ #runlog-body.log{overflow-x:auto}
+ .gt-name{width:100px}
+ details{padding:8px 10px}
+}
+.caret{display:inline-block;width:18px;color:#64748b;font-size:13px;margin-right:4px;transition:transform .12s}
+h2:hover{color:#2563eb}
+.chip{white-space:nowrap;display:inline-block;border-radius:6px;padding:0 7px;font-size:11.5px;line-height:19px;margin-right:6px;color:#fff;vertical-align:1px;font-weight:600;letter-spacing:.5px}
+.chip-考试{background:#dc2626}
+.chip-互评{background:#0d9488}
+.chip-课程{background:#2563eb}
+.chip-竞赛{background:#7c3aed}
+.chip-活动{background:#059669}
+.chip-组织{background:#d97706}
+.chip-事务{background:#6b7280}
+.chip-闲聊{background:#94a3b8}
+.tb-tag{cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:16px;padding:3px 12px;font-size:13px}
+.tb-tag.on{background:#1c1e21;color:#fff;border-color:#1c1e21}
+.clue{color:#9aa0aa;font-size:12px;display:none;margin-top:4px}
+.item.open .clue{display:block}
+.src{color:var(--sub);font-size:12px;cursor:pointer;text-decoration:underline dotted;white-space:nowrap}
+.done .t{text-decoration:line-through;color:#9aa0aa}
+.done{opacity:.75}
+.empty{color:var(--sub);font-size:13.5px;padding:10px 2px}
+details{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+summary{cursor:pointer;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{color:var(--sub);font-weight:600}
+#w-text,#s-text{width:100%;min-height:340px;font:13px/1.65 Consolas,"Microsoft YaHei",monospace;padding:10px;border:1px solid var(--line);border-radius:8px;resize:vertical;box-sizing:border-box;background:#fbfcfe}
+.hint{font-size:12.5px;color:#64748b;margin:0 0 8px}
+.hint code{background:#eef2f9;border-radius:4px;padding:1px 5px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;background:#2b2f36;color:#fff;padding:9px 18px;border-radius:20px;font-size:13px;opacity:0;transition:.25s;pointer-events:none}
+.toast.show{opacity:1}
+#checkbar{margin:8px 12px;padding:8px 10px;border-radius:8px;background:#fff7e6;border:1px solid #f0c36d;font-size:13px;line-height:1.6;display:none}
+.chk-title{font-weight:600;color:#8a5a00;margin-bottom:4px}
+.chk-list{margin:0;padding-left:18px;color:#7a4f00}
+.paidbar{margin:8px 0;padding:7px 10px;border-radius:8px;background:#eef6ff;border:1px solid #b9d5f2;font-size:12.5px;color:#25527d;gap:10px;align-items:center;flex-wrap:wrap}
+.paidbar b{color:#0b4a7d}
+.paidbar .sp{flex:1}
+.viewbar{display:flex;margin:10px 0 4px;border:1px solid #cfd8e3;border-radius:9px;overflow:hidden;width:fit-content;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.viewbar a{display:block;padding:8px 18px;font-size:13.5px;color:#33404f;text-decoration:none;border-right:1px solid #e3e8ef;background:linear-gradient(#ffffff,#f6f9fc)}
+.viewbar a:last-child{border-right:0}
+.viewbar a:hover{background:#eaf2fb}
+.viewbar a.on{background:linear-gradient(#2f6fd0,#245aa8);color:#fff;font-weight:600;box-shadow:inset 0 -2px 0 rgba(0,0,0,.15)}
+.viewbar .vb-hint{align-self:center;padding:0 12px;font-size:12px;color:#8a96a6}
+/* 推荐的时间安排：2×2 四象限 */
+.quadhead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:6px 0 10px;font-size:14px}
+.quadnote{font-size:12px;color:#7b8798}
+.quadwrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+@media (max-width:820px){ .quadwrap{grid-template-columns:1fr} }
+.quad{border:1px solid #e2e8f0;border-radius:12px;background:#fff;padding:10px 10px 4px;min-height:120px}
+.quad.q1{border-color:#f0b4b4;background:#fffafa}
+.quad.q2{border-color:#bcd6f2;background:#fafcff}
+.quad.q3{border-color:#f4d9a8;background:#fffdf7}
+.quad.q4{border-color:#dfe6ee;background:#fcfcfd}
+.quad-title{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:#22303f}
+.quad-title .caret{font-size:11px;color:#8a96a6;width:10px;display:inline-block}
+.quad.folded{min-height:0;padding-bottom:10px}
+.quad.folded .quad-title{margin-bottom:0}
+.quad.q1 .quad-title{color:#a12a2a}
+.quad.q2 .quad-title{color:#1e4f86}
+.quad.q3 .quad-title{color:#8a5a00}
+.quad.q4 .quad-title{color:#5b6775}
+.quad-cnt{font-weight:600;font-size:12px;background:#eef2f7;border-radius:999px;padding:1px 8px;color:#4a5666}
+.quad-hint{font-size:11.5px;color:#7b8798;margin:2px 0 6px}
+.quad-body .item{margin:8px 0}
+.quad-tip{font-size:12.5px;color:#1f6b34;background:#f1fbf3;border:1px solid #cbe9d3;border-radius:8px;padding:4px 8px;margin:4px 0;display:inline-block}
+.empty-s{font-size:12px;color:#a8b3c0;padding:6px 2px 10px}
+.platbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0 2px;font-size:12.5px}
+.pchip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;border:1px solid #dfe6ee;background:#fff;color:#33404f;line-height:1.2}
+.pchip b{font-weight:600}
+.pchip.p-ok{border-color:#b9e2c3;background:#f1fbf3;color:#1f6b34}
+.pchip.p-stale{border-color:#f4d9a8;background:#fff9ec;color:#8a5a00}
+.pchip.p-login,.pchip.p-blocked{border-color:#f0b4b4;background:#fdf1f1;color:#a12a2a}
+.pchip.p-v20{border-color:#f4d9a8;background:#fff9ec;color:#8a5a00}
+.pchip.p-spa{border-color:#bcd6f2;background:#f2f8ff;color:#1e4f86}
+.pchip .go{color:#1c5fbf;text-decoration:underline;cursor:pointer;margin-left:2px}
+.pchip .how{color:#6b7a8c;font-size:11.5px}
+.runstatus{margin:8px 0;padding:10px 14px;border-radius:10px;background:#f0f4fa;border:1px solid #c8d6e8;font-size:13px;line-height:1.6}
+.runstatus.running{background:#fff7e6;border-color:#f0c36d}
+.runstatus.done-ok{background:#f1fbf3;border-color:#b9e2c3}
+.runstatus.done-fail{background:#fdf1f1;border-color:#f0b4b4}
+.runstatus .pbar{height:18px;border-radius:9px;background:#e2e8f0;overflow:hidden;margin:6px 0}
+.runstatus .pfill{height:100%;background:linear-gradient(90deg,#3b82f6,#2563eb);border-radius:9px;transition:width .5s;text-align:center;line-height:18px;color:#fff;font-size:11px;font-weight:600;min-width:30px}
+.runstatus .pfill.idle{background:#9ca3af}
+.runstatus .how{color:#6b7a8c;font-size:11.5px;display:inline-block;margin-top:2px}
+.log{font:12px/1.5 Consolas,"Microsoft YaHei",monospace;background:#1e2330;color:#c8d3e6;padding:10px 14px;border-radius:8px;white-space:pre-wrap;word-break:break-all}
+.log .ok{color:#4ade80}
+.log .err{color:#f87171}
+.log .step{color:#60a5fa;font-weight:600}
+.syncline{margin:10px 0 2px;padding:8px 12px;border-radius:8px;font-size:12.5px;line-height:1.5;border:1px solid #e3e5e9;background:#fff;color:#6b7280}
+.syncline.pending{border-color:#f0c37a;background:#fffaef;color:#96611a}
+.syncline.ok{border-color:#bfe3c9;background:#f6fdf8;color:#2f7d4a}
+.syncline b{font-weight:600}
+</style></head><body><div class="viewbar" id="viewbar"><a href="index.html">🗂 分组视图</a><a href="sorted.html">📅 按截止时间</a><a href="msgtime.html">🕒 按消息时间</a><a href="quadtime.html">🎯 推荐时间安排</a><a href="综测评定.html">🧮 综测评定</a><a href="自动化.html" class="on">⚙️ 自动化插件</a><span class="vb-hint">每个插件独立计量</span></div>
+<div style="max-width:1100px;margin:0 auto;padding:18px 22px 40px">
+  <h2 style="margin:6px 0 4px">⚙️ 自动化插件</h2>
+  <p class="hint" style="margin:0 0 14px">这些是挂在本机后台常驻跑的小程序。
+  <b>只有本机（127.0.0.1）能启动/停止</b>，手机打开这一页只能看状态。每个插件各自计量次数与费用，不并进面板的模型用量。</p>
+  <div id="a-list"></div>
+</div>
+<!--AUTO-PLUGINS-JS:v3-->
+<script>
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+  function toast2(m){ try{ toast(m); }catch(e){ console.log(m); } }
+  function money(v){ return "¥" + (Number(v||0)).toFixed(2); }
+  function post(url, obj){
+    return fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(obj||{})}).then(function(r){return r.json();});
+  }
+  function card(p){
+    var badge=p.running
+      ? '<span style="color:#16a34a;font-weight:600">● 运行中　pid '+p.pid+'</span>'
+      : '<span style="color:#9ca3af;font-weight:600">● 已停止</span>';
+    var u=p.usage||{};
+    var sum=(p.plan_summary||[]);
+    var tail=(p.log_tail||[]).map(esc).join("\n");
+    var last=(p.last_result||"").replace(/^\[[^\]]*\]\s*/,"").slice(0,120);
+    return '<div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin:14px 0;background:#fff">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
+      +   '<b style="font-size:16px">'+esc(p.name)+'</b>'+badge+'</div>'
+      + '<div class="hint" style="margin:6px 0">'+esc(p.desc)+'</div>'
+      + '<div class="hint">最近收到推文：<b>'+esc(p.last_article||"—")+'</b>　资料完整：'+(p.profile_ok?'✅':'⚠️ 缺手机号/QQ')+'</div>'
+      + '<div class="hint">最近结果：'+esc(last||"—")+'</div>'
+      + '<div class="hint" style="margin-top:10px;padding:8px;background:#f8fafc;border-radius:8px">'
+      +   '本插件独立计量：推文 <b>'+(u.runs||0)+'</b> 次　表单 <b>'+(u.forms||0)+'</b> 次　提交 <b>'+(u.submits||0)+'</b> 次　费用 <b>'+money(u.cost)+'</b>'
+      +   ' <button class="btn" data-reset="'+esc(p.id)+'" style="margin-left:8px;padding:1px 8px;font-size:12px">清零</button></div>'
+      + '<div style="margin-top:10px;border-top:1px dashed #e5e7eb;padding-top:10px">'
+      +   '<div class="hint" style="font-weight:600;color:#111">📝 下周时间安排（直接打字，一行一条）</div>'
+      +   '<div class="hint">例如：<code>下周三下午没空</code>　<code>11月26日 13:00-18:30 有事</code>　<code>每周六上午有课</code></div>'
+      +   '<textarea data-plan="'+esc(p.id)+'" spellcheck="false" style="width:100%;min-height:88px;margin:6px 0;padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-family:inherit">'+esc(p.plan_text||"")+'</textarea>'
+      +   '<div><button class="btn btn-primary" data-save="'+esc(p.id)+'">保存</button> '
+      +     '<span class="hint">'+(p.plan_saved_at?('已保存 '+esc(p.plan_saved_at)):'还没填')+(sum.length?('　已识别：'+sum.map(esc).join('；')):'')+'</span></div>'
+      + '</div>'
+      + '<pre style="background:#f9fafb;border:1px solid #f1f5f9;border-radius:8px;padding:8px;max-height:130px;overflow:auto;font-size:12px;margin:8px 0;white-space:pre-wrap">'+tail+'</pre>'
+      + '<div><button class="btn btn-primary" data-act="start" data-id="'+esc(p.id)+'"'+(p.running?" disabled":"")+'>▶ 启动</button> '
+      + '<button class="btn" data-act="stop" data-id="'+esc(p.id)+'"'+(p.running?"":" disabled")+'>⏹ 停止</button></div>'
+      + '</div>';
+  }
+  async function loadAuto(){
+    var box=$("a-list"); if(!box) return;
+    box.innerHTML='<div class="hint">读取中…</div>';
+    try{
+      var j=await (await fetch("/api/auto")).json();
+      if(!j.ok){ box.innerHTML='<div class="hint">读不到：'+esc(j.err||"")+'</div>'; return; }
+      var ps=j.plugins||[];
+      box.innerHTML = ps.length ? ps.map(card).join("") : '<div class="hint">还没有插件</div>';
+      box.querySelectorAll("button[data-act]").forEach(function(b){
+        b.addEventListener("click", async function(){
+          b.textContent="处理中…";
+          try{ var jj=await post("/api/auto/"+b.dataset.act,{id:b.dataset.id});
+               toast2(jj.ok?(b.dataset.act==="start"?"已启动":"已停止"):("失败："+(jj.err||""))); }
+          catch(e){ toast2("失败："+e); }
+          loadAuto();
+        });
+      });
+      box.querySelectorAll("button[data-reset]").forEach(function(b){
+        b.addEventListener("click", async function(){
+          if(!confirm("把这个插件的计量清零？")) return;
+          try{ var jj=await post("/api/auto/reset",{id:b.dataset.reset}); toast2(jj.ok?"已清零":("失败："+(jj.err||""))); }
+          catch(e){ toast2("失败："+e); }
+          loadAuto();
+        });
+      });
+      box.querySelectorAll("button[data-save]").forEach(function(b){
+        b.addEventListener("click", async function(){
+          var ta=box.querySelector('textarea[data-plan="'+b.dataset.save+'"]');
+          b.textContent="保存中…";
+          try{
+            var jj=await post("/api/auto/plan",{id:b.dataset.save, text:ta?ta.value:""});
+            toast2(jj.ok ? (jj.warn ? "已保存，但有行没看懂" : "时间安排已保存") : ("保存失败："+(jj.err||"")));
+          }catch(e){ toast2("保存失败："+e); }
+          loadAuto();
+        });
+      });
+    }catch(e){ box.innerHTML='<div class="hint">读不到：'+esc(e)+'</div>'; }
+  }
+  if(document.readyState!=="loading") loadAuto();
+  else document.addEventListener("DOMContentLoaded", loadAuto);
+  window.__autoReload = loadAuto;
+})();
+</script>
+</body></html>
