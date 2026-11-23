@@ -1227,7 +1227,7 @@ function dedupeRows(){
 // ── 手动置顶（用户 m22872/m22979：把「日程表里已有的消息」自己钉到顶部圈出的位置）────
 // 数据 data2/manual_pins.json = {"ids":[条目id…]}，由 panel_server 的 /api/pins 增删；
 // 置顶显示的内容一律从 DATA.items 里按 id 取，不另存一份，改期/改字后自动跟着变。
-const PINS = (typeof {"ids": ["61da762b59", "f9d3099126", "3b1bfb5405", "67c378ee50", "bc61d306e7", "1a14872904"]} === "object" && {"ids": ["61da762b59", "f9d3099126", "3b1bfb5405", "67c378ee50", "bc61d306e7", "1a14872904"]}) ? {"ids": ["61da762b59", "f9d3099126", "3b1bfb5405", "67c378ee50", "bc61d306e7", "1a14872904"]} : {"ids":[]};
+const PINS = (typeof {"ids": []} === "object" && {"ids": []}) ? {"ids": []} : {"ids":[]};
 function pinIds(){
   const a = (PINS && (PINS.ids || PINS.items)) || [];
   return a.map(x => (x && typeof x === "object") ? String(x.id || "") : String(x)).filter(Boolean);
