@@ -1016,18 +1016,47 @@ let URGENT_NAMES = new Set();
 function renderUrgent(){
   const box = $id("urgent");
   if (!box) return;
-  // 只在「快截止（≤2 天）且未交」时才置顶：>2 天的条目日程列表里本来就有，再置顶就是重复
-  // 只留「未交 且 还没过期」的。剩余小时 是抓取时算的、不会自己变，
-  // 所以必须用 截止 跟当前时间比，否则过期条目会一直挂在置顶上（2026-11-10 用户报）。
+  // 2026-11-23 用户要求：「置顶消息只置顶最近五天内要提交的和互评，自评，考试」
+  //   · 时间窗：截止在「现在 ~ 5 天后」之间（过期的不置顶，5 天以后的也不置顶）
+  //   · 内容：还没交的测验/作业、还没做完的互评/自评、考试类
   const _nowMs = Date.now();
-  const items = ((MOOC_TODO && MOOC_TODO.items) || []).filter(x => {
-    if (!x || !x.未交) return false;
-    const s = String(x.截止 || "");
-    if (!s) return true;
+  const URGENT_DAYS = 5;
+  const _dueMs = (x) => {
+    const s = String((x && x.截止) || "");
+    if (!s) return NaN;
     const t = new Date(s.replace(/-/g, "/")).getTime();
-    if (!isFinite(t)) return true;
-    return t > _nowMs;
-  });
+    return isFinite(t) ? t : NaN;
+  };
+  const _peerOpen = (x) => !!(x && x.互评 && x.互评.完成 === false);
+  const _selfOpen = (x) => !!(x && x.自评 && x.自评.完成 === false);
+  const _isExam = (x) => {
+    const typ = String((x && x.类型) || "");
+    const nm = String((x && x.名称) || "");
+    const cs = String((x && x.课程) || "");
+    return typ.indexOf("考试") >= 0 || /考试|机考/.test(nm) || /考试|机考/.test(cs);
+  };
+  // 「考试」不只慕课有，QQ/微信里的机考通知也算（用户 m22529 要求）。
+  // 这里把日程表里 5 天内、还没完成的考试类条目并进来一起置顶。
+  const _schedExams = (DATA.items || []).filter(x => {
+    if (!x || isDone(x.id)) return false;
+    const typ = String(x.类型 || "");
+    const what = String(x.事项 || "");
+    if (!/考试|机考/.test(typ) && !/考试|机考/.test(what)) return false;
+    const t = _dueMs({ 截止: x.截止 });
+    if (!isFinite(t)) return false;
+    const lh = (t - _nowMs) / 3600000;
+    return lh > 0 && lh <= URGENT_DAYS * 24;
+  }).map(x => ({ 名称: x.事项, 类型: "考试", 课程: String(x.来源群 || ""), 截止: x.截止,
+                 _fromSchedule: true, _leftHours: (new Date(String(x.截止 || "").replace(/-/g, "/")).getTime() - Date.now()) / 3600000 }));
+  const items = ((MOOC_TODO && MOOC_TODO.items) || []).filter(x => {
+    if (!x) return false;
+    const t = _dueMs(x);
+    if (!isFinite(t)) return false;                  // 没截止时间的进不了置顶
+    const lh = (t - _nowMs) / 3600000;
+    if (!(lh > 0 && lh <= URGENT_DAYS * 24)) return false;   // 只留 5 天内
+    if (x.未交) return true;                         // 该交还没交的测验/作业
+    return _peerOpen(x) || _selfOpen(x) || _isExam(x); // 互评 / 自评 / 考试
+  }).concat(_schedExams);
   URGENT_NAMES = new Set(items.map(x => String(x.名称 || "").replace(/\s+/g, "")));
   if (!items.length) { box.style.display = "none"; return; }
   // 剩余小时 / 快截止 是抓取那一刻算的，之后不会自己变。这里一律用「截止 - 现在」实时重算，
@@ -1043,9 +1072,9 @@ function renderUrgent(){
   box.className = "urgent" + (hot ? "" : " warm");
   box.innerHTML = "";
   const h = el("div", "uh");
-  h.appendChild(document.createTextNode(hot ? "⚠️ 快截止，还没交" : "📌 慕课待交（都还开着）"));
+  h.appendChild(document.createTextNode(hot ? "⚠️ 快截止，还没做完" : "📌 5 天内要交/互评/自评/考试"));
   h.appendChild(el("span", "n2", String(items.length)));
-  const sub = el("span", "st", hot ? "两天内截止，先做这些" : "提前安排，别等临期");
+  const sub = el("span", "st", hot ? "两天内截止，先做这些" : "只列 5 天内的，更远的不占地方");
   sub.style.fontWeight = "400";
   h.appendChild(sub);
   // 数据时间：mooc_todo.json 若是旧的，置顶会一直显示旧内容却毫无提示
