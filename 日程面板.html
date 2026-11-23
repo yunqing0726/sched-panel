@@ -1054,8 +1054,14 @@ function renderUrgent(){
     if (!isFinite(t)) return false;                  // 没截止时间的进不了置顶
     const lh = (t - _nowMs) / 3600000;
     if (!(lh > 0 && lh <= URGENT_DAYS * 24)) return false;   // 只留 5 天内
-    if (x.未交) return true;                         // 该交还没交的测验/作业
-    return _peerOpen(x) || _selfOpen(x) || _isExam(x); // 互评 / 自评 / 考试
+    // 2026-11-23 用户再收紧口径：「只置顶考试，作业，互评，自评」——
+    // 所以测验（quiz）一律不进置顶，只留 作业 / 互评 / 自评 / 考试 四类。
+    const typ = String(x.类型 || "");
+    if (typ.indexOf("测验") >= 0) return false;
+    if (typ.indexOf("考试") >= 0 || _isExam(x)) return true;      // 考试
+    if (typ.indexOf("互评") >= 0) return _peerOpen(x) || !x.已交;  // 互评还没做完
+    // 作业：没交，或交了但互评/自评还没做完
+    return !!x.未交 || _peerOpen(x) || _selfOpen(x);
   }).concat(_schedExams);
   URGENT_NAMES = new Set(items.map(x => String(x.名称 || "").replace(/\s+/g, "")));
   if (!items.length) { box.style.display = "none"; return; }
@@ -1072,9 +1078,9 @@ function renderUrgent(){
   box.className = "urgent" + (hot ? "" : " warm");
   box.innerHTML = "";
   const h = el("div", "uh");
-  h.appendChild(document.createTextNode(hot ? "⚠️ 快截止，还没做完" : "📌 5 天内要交/互评/自评/考试"));
+  h.appendChild(document.createTextNode(hot ? "⚠️ 快截止，还没做完" : "📌 5 天内的考试/作业/互评/自评"));
   h.appendChild(el("span", "n2", String(items.length)));
-  const sub = el("span", "st", hot ? "两天内截止，先做这些" : "只列 5 天内的，更远的不占地方");
+  const sub = el("span", "st", hot ? "两天内截止，先做这些" : "测验不算在内，只有考试/作业/互评/自评");
   sub.style.fontWeight = "400";
   h.appendChild(sub);
   // 数据时间：mooc_todo.json 若是旧的，置顶会一直显示旧内容却毫无提示
