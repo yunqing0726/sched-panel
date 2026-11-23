@@ -24,6 +24,8 @@ h1{font-size:22px;margin:0 0 4px}
 .pinbar .pn{background:#4f46e5;color:#fff;border-radius:10px;padding:1px 8px;font-size:12px;font-weight:400}
 .pinbar .pi{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;padding:6px 0;border-top:1px dashed #c7d2fe;font-size:13px}
 .pinbar .pi:first-of-type{border-top:0;padding-top:0}
+.pinbar .prow{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
+.pinbar .pdet{margin:6px 0 2px 4px;padding:6px 9px;border-left:3px solid #c7d2fe;background:#f8faff;color:#374151;font-size:12px;line-height:1.7;white-space:pre-wrap;word-break:break-all}
 .pinbar .pi .nm{font-weight:600;color:#312e81}
 .pinbar .pi .x{cursor:pointer;color:#9ca3af;font-size:12px;padding:0 3px}
 .pinbar .pi .x:hover{color:#dc2626}
@@ -1227,23 +1229,61 @@ function dedupeRows(){
 // ── 手动置顶（用户 m22872/m22979：把「日程表里已有的消息」自己钉到顶部圈出的位置）────
 // 数据 data2/manual_pins.json = {"ids":[条目id…]}，由 panel_server 的 /api/pins 增删；
 // 置顶显示的内容一律从 DATA.items 里按 id 取，不另存一份，改期/改字后自动跟着变。
-const PINS = (typeof {"ids": []} === "object" && {"ids": []}) ? {"ids": []} : {"ids":[]};
+const PINS = (typeof {"ids": ["61da762b59", "f9d3099126", "3b1bfb5405", "67c378ee50", "bc61d306e7", "1a14872904"]} === "object" && {"ids": ["61da762b59", "f9d3099126", "3b1bfb5405", "67c378ee50", "bc61d306e7", "1a14872904"]}) ? {"ids": ["61da762b59", "f9d3099126", "3b1bfb5405", "67c378ee50", "bc61d306e7", "1a14872904"]} : {"ids":[]};
 function pinIds(){
   const a = (PINS && (PINS.ids || PINS.items)) || [];
   return a.map(x => (x && typeof x === "object") ? String(x.id || "") : String(x)).filter(Boolean);
 }
 function isPinned(id){ return pinIds().indexOf(String(id)) >= 0; }
+// 置顶/取消置顶：成功后就地更新，不刷新整页、不弹窗（用户 m23124：置顶时不要黑色弹窗）
+let PINS_LOCAL = null;
+function pinsLive(){
+  if (!PINS_LOCAL) {
+    PINS_LOCAL = {ids: pinIds()};
+  }
+  return PINS_LOCAL;
+}
+function pinHint(msg){
+  const bar = document.getElementById("pinbar");
+  if (!bar || !msg) return;
+  let n = document.getElementById("pin-hint");
+  if (!n) {
+    n = el("div", "hint");
+    n.id = "pin-hint";
+    bar.appendChild(n);
+  }
+  n.textContent = msg;
+  clearTimeout(n._h);
+  n._h = setTimeout(() => { if (n && n.parentNode) n.textContent = ""; }, 4000);
+}
 async function pinToggle(id, pin){
-  if (!isLocalPanel()) { alert("云端副本不能改，回电脑面板改"); return; }
+  const sid = String(id);
+  const st = pinsLive();
+  const before = st.ids.slice();
+  // 先本地生效（界面立刻有反馈），失败再回滚
+  if (pin) { if (st.ids.indexOf(sid) < 0) st.ids.push(sid); }
+  else { st.ids = st.ids.filter(x => x !== sid); }
+  PINS.ids = st.ids.slice();
+  renderPins();
+  render();
+  if (!isLocalPanel()) {
+    // 云端副本没有 /api/pins：只在本机记住，别弹窗打断（用户 m23124）
+    pinHint("云端副本改不了，回电脑面板点 📌 才会真正保存");
+    return;
+  }
   try {
-    await api("/api/pins", {method:"POST", body: JSON.stringify({op: pin ? "add" : "del", id: String(id)})});
-    location.reload();
-  } catch (e) { alert((pin ? "置顶" : "取消置顶") + "失败：" + e.message); }
+    const r = await api("/api/pins", {method:"POST", body: JSON.stringify({op: pin ? "add" : "del", id: sid})});
+    if (r && r.ids) { st.ids = r.ids.map(String); PINS.ids = st.ids.slice(); renderPins(); render(); }
+  } catch (e) {
+    st.ids = before; PINS.ids = before.slice();
+    renderPins(); render();
+    pinHint((pin ? "置顶" : "取消置顶") + "没保存成功：" + e.message);
+  }
 }
 function renderPins(){
   const bar = document.getElementById("pinbar");
   if (!bar) return;
-  const ids = pinIds();
+  const ids = pinsLive().ids;
   const byId = {};
   (DATA.items || []).forEach(x => { if (x && x.id) byId[String(x.id)] = x; });
   const list = ids.map(id => byId[id]).filter(Boolean);
@@ -1252,26 +1292,44 @@ function renderPins(){
   h.appendChild(document.createTextNode("📌 手动置顶"));
   h.appendChild(el("span", "pn", String(list.length)));
   const tip = el("span", "hint", list.length
-    ? "这些是你自己在日程表里点📌钉上来的，不受「5 天」限制；点 ✕ 取消"
+    ? "这些是你自己在日程表里点📌钉上来的，不受「5 天」限制；点一行看详情，点 ✕ 取消"
     : "在下面任意一条日程右边点 📌，它就钉到这块的最上面");
   h.appendChild(tip);
   bar.appendChild(h);
   list.forEach(x => {
     const row = el("div", "pi");
+    const head = el("div", "prow");
     const tg = tagOf(x);
     const chip = el("span", "chip chip-" + tg, tg);
     const ccol = colorOf(x);
     if (ccol) chip.style.background = ccol;
-    row.appendChild(chip);
-    row.appendChild(el("span", "nm", String(x["事项"] || "")));
-    if (x["截止"]) row.appendChild(el("span", "tag due", "截止 " + x["截止"]));
+    head.appendChild(chip);
+    head.appendChild(el("span", "nm", String(x["事项"] || "")));
+    if (x["截止"]) head.appendChild(el("span", "tag due", "截止 " + x["截止"]));
     const rel = relDeadline(x);
-    if (rel) row.appendChild(el("span", "tag soon", rel));
-    row.appendChild(el("span", "hint", groupNameOf(x)));
+    if (rel) head.appendChild(el("span", "tag soon", rel));
+    head.appendChild(el("span", "hint", groupNameOf(x)));
     const xd = el("span", "x", "✕");
     xd.title = "取消置顶（条目本身还在日程里）";
-    xd.onclick = () => pinToggle(x.id, false);
-    row.appendChild(xd);
+    xd.onclick = (ev) => { if (ev) ev.stopPropagation(); pinToggle(x.id, false); };
+    head.appendChild(xd);
+    head.style.cursor = "pointer";
+    head.title = "点一下展开/收起详情";
+    row.appendChild(head);
+    // 详情（默认收起）：点这一行展开，跟列表里「详情」等价（用户 m23124：可以点击显示详细内容）
+    const det = el("div", "pdet");
+    det.style.display = "none";
+    const bits = [];
+    if (x["类型"]) bits.push("类型：" + x["类型"]);
+    if (x["发送者"]) bits.push("发件人：" + x["发送者"]);
+    if (x["消息时间"]) bits.push("群内发送：" + x["消息时间"]);
+    if (x["来源群"]) bits.push("来源群：" + x["来源群"]);
+    if (x["负责人"]) bits.push("负责人：" + x["负责人"]);
+    if (x["原文"]) bits.push("原文：" + String(x["原文"]).slice(0, 300));
+    if (x["标注"] || x["备注"]) bits.push("备注：" + (x["标注"] || x["备注"]));
+    det.textContent = bits.length ? bits.join(String.fromCharCode(10)) : "（这条没有更多详情）";
+    row.appendChild(det);
+    head.onclick = () => { det.style.display = (det.style.display === "none" ? "" : "none"); };
     bar.appendChild(row);
   });
   bar.style.display = "";
