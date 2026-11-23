@@ -354,6 +354,17 @@ th{color:var(--sub);font-weight:600}
       + '<div class="hint" style="margin-top:10px;padding:8px;background:#f8fafc;border-radius:8px">'
       +   '本插件独立计量：'+usageLine+'　费用 <b>'+money(u.cost)+'</b>'
       +   ' <button class="btn" data-reset="'+esc(p.id)+'" style="margin-left:8px;padding:1px 8px;font-size:12px">清零</button></div>'
+      + (p.id==="volunteer" ? (
+          '<div style="margin-top:10px;border:1px solid #dbeafe;background:#eff6ff;border-radius:10px;padding:10px 12px">'
+        + '<div class="hint" style="font-weight:600;color:#1e3a8a">🔗 贴推文链接，立刻抓+填表</div>'
+        + '<div class="hint">从微信里复制「NEU志愿者之家」新推文的链接（<code>https://mp.weixin.qq.com/s/…</code>）贴下面，点右边按钮，程序马上跑：解二维码→筛浑南→填表→提交。</div>'
+        + '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">'
+        +   '<input data-url-input="'+esc(p.id)+'" placeholder="https://mp.weixin.qq.com/s/..." spellcheck="false" style="flex:1;min-width:260px;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-family:inherit" value="'+esc((p.url_state&&p.url_state.url)||"")+'">'
+        +   '<button class="btn btn-primary" data-run-url="'+esc(p.id)+'">⚡ 抓这篇</button>'
+        + '</div>'
+        + ((p.url_state&&p.url_state.at)?('<div class="hint" style="margin-top:6px">上次贴的：'+esc(p.url_state.at)+'　pid '+esc(String(p.url_state.pid||""))+'　日志：log\\url_run.log</div>'):'')
+        + '</div>')
+        : '')
       + '<div style="margin-top:10px;border-top:1px dashed #e5e7eb;padding-top:10px">'
       + (p.plan_text!==undefined ? (
           '<div class="hint" style="font-weight:600;color:#111">📝 下周时间安排（直接打字，一行一条）</div>'
@@ -408,6 +419,19 @@ th{color:var(--sub);font-weight:600}
             toast2(jj.ok ? (jj.warn ? "已保存，但有行没看懂" : "时间安排已保存") : ("保存失败："+(jj.err||"")));
           }catch(e){ toast2("保存失败："+e); }
           loadAuto();
+        });
+      });
+      box.querySelectorAll("button[data-run-url]").forEach(function(b){
+        b.addEventListener("click", async function(){
+          var inp=box.querySelector('input[data-url-input="'+b.dataset.runUrl+'"]');
+          var u=(inp&&inp.value||"").trim();
+          if(!u){ toast2("先把推文链接贴上"); return; }
+          b.textContent="启动中…"; b.disabled=true;
+          try{
+            var jj=await post("/api/auto/url",{id:b.dataset.runUrl,url:u});
+            toast2(jj.ok?("已开始跑（pid "+jj.pid+"），看下面日志"):("失败："+(jj.err||"")));
+          }catch(e){ toast2("失败："+e); }
+          setTimeout(function(){ b.textContent="⚡ 抓这篇"; b.disabled=false; loadAuto(); }, 1200);
         });
       });
       box.querySelectorAll("button[data-hit-seen]").forEach(function(b){
