@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>我的待办日程</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2f6fed">
+<meta name="theme-color" content="#A8382C">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="日程">
@@ -321,24 +321,362 @@ th{color:var(--sub);font-weight:600}
 .syncline b{font-weight:600}
 </style>
 
+<style id="paper-skin">/* 纸面皮肤（编年方向）· 覆盖层
+   只改颜色 / 字体 / 边框 / 圆角 / 报头，不动面板任何 DOM 语义与 JS。
+   三方向定稿选定方向 1「编年」后落地：无圆角、发丝线、衬线大标题、朱砂红只给 5 天内。 */
+:root{
+  --bg:#F7F7F4; --card:#FFFFFF; --line:#DCDED9; --txt:#15191C; --sub:#5C6366;
+  --blue:#2C4F6B; --green:#2F6B45; --red:#A8382C; --amber:#8A6A1F;
+  --paper:#F7F7F4; --paper2:#EFF0EA; --rule:#DCDED9; --rule2:#B9BDB6; --zhu:#A8382C;
+}
+body{background:var(--bg);color:var(--txt);
+  font:15px/1.62 "Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;padding:34px 32px 94px}
+
+/* 报头：左衬线大标题，右 生成时间 / 消息截止 */
+.mast{display:flex;align-items:flex-end;justify-content:space-between;gap:26px;
+  margin:0 0 14px;padding:0 0 12px;border-bottom:3px solid var(--txt)}
+.mast>div:first-child{min-width:0}
+h1{font-family:"Noto Serif SC",serif;font-weight:900;font-size:40px;line-height:1.06;
+  letter-spacing:-.5px;margin:0}
+.meta{color:var(--sub);font-size:12.5px;line-height:1.8;margin:0;text-align:right;
+  flex:0 0 auto;white-space:pre-line;align-self:flex-end}
+.meta b{color:var(--txt);font-family:"Cascadia Mono",Consolas,monospace;font-weight:700;font-size:13px}
+
+/* 统计行：发丝线切开，无边框无圆角 */
+.stats{gap:0;margin:0 0 18px;padding:16px 0 14px;border-bottom:1px solid var(--rule)}
+.stat{background:none;border:0;border-right:1px solid var(--rule);border-radius:0;
+  padding:0 26px 0 0;margin:0 26px 0 0;min-width:0;text-align:left}
+.stat:last-child{border-right:0;margin-right:0;padding-right:0}
+.stat b{display:block;font-family:"Noto Serif SC",serif;font-weight:900;font-size:30px;line-height:1.1}
+.stat span{color:var(--sub);font-size:12px;letter-spacing:.05em}
+.stat.stat-hot b{color:var(--zhu)}
+
+/* 付费/用量条 */
+.paidbar{background:var(--paper2);border:1px solid var(--rule);border-radius:0;
+  font-size:12.5px;color:var(--sub);padding:8px 12px}
+.paidbar b{color:var(--txt)}
+
+/* 5 天内 / 置顶 / 成绩箱：保留功能色，换成纸上的低饱和版 */
+.urgent{border:1px solid #D9B8B3;border-left:3px solid var(--zhu);background:#FBF4F3;
+  border-radius:0;padding:12px 14px;margin:0 0 16px}
+.urgent.warm{border-color:#DCC79A;border-left-color:#8A6A1F;background:#FCF8EE}
+.urgent .uh{color:#8E2F26;font-weight:700;font-size:13.5px;letter-spacing:.02em}
+.urgent.warm .uh{color:#7A5D18}
+.urgent .uh .n2{background:var(--zhu);border-radius:2px;font-variant-numeric:tabular-nums}
+.urgent.warm .uh .n2{background:#8A6A1F}
+.urgent .ui{border-top:1px dashed #E2C9C5;font-size:13px;padding:7px 0}
+.urgent.warm .ui{border-top-color:#E6D7B4}
+.urgent .ui .nm{color:#5A1D17}
+.urgent.warm .ui .nm{color:#5A4410}
+.urgent .ui .co{background:#F3E4E1;color:#7A2A22;border-radius:2px;font-size:12px}
+.urgent .ui .st,.urgent .ui .lf,.urgent .ui .ev{font-size:12px}
+.urgent .ui .dl{color:#8E2F26}
+.urgent .ui .lf{background:var(--zhu);border-radius:2px}
+.urgent.warm .ui .lf{background:#8A6A1F}
+.urgent .ui .st{color:#8E2F26}
+.urgent .ui .ev{background:#E3EFEA;color:#245540;border-radius:2px}
+.urgent .ui .ev.warn{background:#F5EBD3;color:#7A5D18}
+.scorebox{border:1px solid #C6D4DF;border-left:3px solid var(--blue);background:#F3F6F9;border-radius:0}
+.scorebox .uh{color:#24455F}.scorebox .uh .n2{background:var(--blue)}
+.scorebox .ui{border-top-color:#D2DDE6}
+.scorebox .ui .nm{color:#1D3548}
+.scorebox .ui .co{background:#E3EBF1;color:#2C4F6B}
+.scorebox .ui .dl{color:#2C4F6B}
+.scorebox .ui .sc{background:var(--blue);border-radius:2px}
+.scorebox .ui .st{color:#2C4F6B}
+.item.urgent-item{background:#FBF4F3;border-color:#D9B8B3;border-left:3px solid var(--zhu);border-radius:0}
+
+/* 手动置顶 */
+.pinbar{border:1px solid #C9C9DE;border-left:3px solid #5A4E86;background:#F5F3F8;border-radius:0}
+.pinbar .ph{color:#413866;font-weight:700;font-size:13px}
+.pinbar .pn{background:#5A4E86;border-radius:2px}
+.pinbar .pi{border-top-color:#D8D3E4;font-size:13px}
+.pinbar .pi .nm{color:#3A3159}
+.pinbar .pdet{background:#FBFAFD;border-left-color:#C9C9DE;color:#3F474A}
+.pinbar .padd{border-top-color:#D8D3E4}
+.pinbar .padd input[type=text],.pinbar .padd input[type=datetime-local]{
+  border-color:var(--rule2);border-radius:0;background:#fff;font-size:13px}
+.pinbar .hint{color:var(--sub)}
+.pinbar .pi .x{color:#63696C}.pinbar .pi .x:hover{color:var(--zhu)}
+
+/* 工具栏 / 按钮 */
+.toolbar{margin:0 0 14px;gap:7px}
+.toolbar input{border:1px solid var(--rule2);border-radius:0;background:#fff;font-size:13.5px;
+  padding:8px 11px}
+.toolbar input:focus{outline:2px solid #D8D5CC;border-color:var(--txt)}
+.btn{border:1px solid var(--rule2);background:#fff;border-radius:0;font-size:13px;
+  padding:8px 13px;color:var(--txt);transition:background .12s,border-color .12s}
+.btn:hover{border-color:var(--txt);color:var(--txt);background:var(--paper2)}
+.btn.btn-primary{background:var(--zhu);border-color:var(--zhu);color:#fff;font-weight:700}
+.btn.btn-primary:hover{background:#8E2F26;border-color:#8E2F26;color:#fff}
+.btn.btn-mini{border-radius:0;font-size:12.5px;color:#3F474A;padding:4px 9px}
+
+/* 视图条 */
+.viewbar{border:1px solid var(--rule2);border-radius:0;background:#fff;overflow:hidden}
+.viewbar a{border-right:1px solid var(--rule);font-size:13px;padding:10px 14px;color:#3F474A}
+.viewbar a:last-child{border-right:0}
+.viewbar a:hover{background:var(--paper2);color:var(--txt)}
+.viewbar a.on{background:var(--txt);color:#fff}
+.viewbar .vb-hint{color:var(--sub);font-size:12px}
+
+/* 平台状态条 */
+.platbar{font-size:12px;color:var(--sub);gap:6px}
+.platbar .pill,.platbar a{border:1px solid var(--rule2);border-radius:0;background:#fff;
+  padding:3px 9px;font-size:12px}
+.pchip{border:1px solid var(--rule2);border-radius:0;background:#fff;font-size:12px}
+.pchip.p-ok{border-color:#A9C4B4;background:#F2F7F4;color:#245540}
+.pchip.p-stale{border-color:#DCC79A;background:#FCF8EE;color:#7A5D18}
+.pchip.p-login,.pchip.p-blocked{border-color:#D9B8B3;background:#FBF4F3;color:#8E2F26}
+.pchip .go{color:var(--blue)}
+
+/* 运行状态 */
+.runstatus{border:1px solid var(--rule);border-radius:0;background:var(--paper2);font-size:13px}
+.runstatus .pbar{background:#DCDED9;border-radius:0;height:4px}
+.runstatus .pfill{background:var(--txt);border-radius:0}
+.runstatus .pfill.idle{background:#B9BDB6}
+.syncline{border-radius:0;border:1px solid #A9C4B4;background:#F2F7F4;color:#245540;font-size:12.5px}
+.syncline.err,.syncline.warn{border-color:#DCC79A;background:#FCF8EE;color:#7A5D18}
+
+/* 分节标题：编年分隔线 */
+h2{font-family:"Noto Serif SC",serif;font-weight:900;font-size:19px;letter-spacing:-.2px;
+  margin:30px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--txt)}
+h2 .cnt{background:none;border:1px solid var(--rule2);border-radius:2px;color:#3F474A;
+  font-family:"Cascadia Mono",Consolas,monospace;font-size:12px;padding:0 7px;font-weight:400}
+h2:hover{color:var(--zhu)}
+.caret{color:var(--sub)}
+
+/* 条目：连成一条编年流水，不是一张张卡片 */
+.item{background:#fff;border:1px solid var(--rule);border-radius:0;padding:11px 13px;
+  margin-bottom:0;border-bottom-width:0;transition:background .12s}
+.item:last-of-type{border-bottom-width:1px}
+.item:hover{border-color:var(--rule2);background:#FCFCFA}
+.item.peer{background:#F1F6F4;border-color:#BCD2C8;border-left:3px solid #2F6B45;padding-left:11px}
+.item.peer.done{background:#F7F9F8;border-left-color:#B9C7C1}
+.item input[type=checkbox]{width:17px;height:17px;accent-color:var(--zhu)}
+.t{font-weight:600;font-size:14.5px;line-height:1.55}
+.sub{color:var(--sub);font-size:12.5px;gap:10px}
+.src{color:var(--blue);font-size:12px;text-decoration:none;border-bottom:1px dotted #A9BCCB}
+.clue{color:#6E7578;font-size:12px;border-left:2px solid var(--rule);padding-left:9px;margin-top:6px}
+.done .t{text-decoration-color:#C8CBC6;color:#8A9093}
+
+/* 标签：统一成描边小签，去掉糖果底 */
+.tag{background:none;border:1px solid var(--rule2);border-radius:2px;color:#3F474A;
+  font-size:12px;line-height:18px;padding:0 6px;letter-spacing:.02em}
+.tag.due{background:#FBF4F3;border-color:#D9B8B3;color:#8E2F26}
+.tag.today{background:#FCF8EE;border-color:#DCC79A;color:#7A5D18}
+.tag.week{background:#F2F7F4;border-color:#A9C4B4;color:#245540}
+.tag.rep{background:#F5F3F8;border-color:#C9C9DE;color:#413866}
+.tag.new{background:#F0F3F6;border-color:#C6D4DF;color:#24455F;font-weight:600}
+.tag.watch{background:#FCF8EE;border-color:#DCC79A;color:#7A5D18}
+.tag.soon{background:#F0F3F6;border-color:#C6D4DF;color:#24455F}
+.tag.overdue{background:#FBF4F3;border-color:#D9B8B3;color:#8E2F26}
+.tag.star{background:#FCF8EE;border-color:#DCC79A;color:#7A5D18;font-weight:700;font-size:12.5px}
+.tag.warnx{background:#FCF8EE;border-color:#DCC79A;color:#7A5D18}
+.tag.ann{background:#F0F3F6;border-color:#C6D4DF;color:#24455F}
+.sendergray{color:#6E7477;font-size:12px}
+
+/* 类型 chip：低饱和印刷色 */
+.chip{border-radius:2px;font-size:12px;line-height:18px;padding:0 6px;font-weight:600;letter-spacing:.03em}
+.chip-考试{background:#A8382C}.chip-互评{background:#2F6B45}.chip-课程{background:#2C4F6B}
+.chip-竞赛{background:#5A4E86}.chip-活动{background:#3F6B52}.chip-组织{background:#8A6A1F}
+.chip-事务{background:#6E7578}.chip-闲聊{background:#6C7270}.chip-MOOC{background:#2C6A8A}
+.chip-雨课堂{background:#A25A28}.chip-学习通{background:#2F6B45}.chip-智慧树{background:#5A4E86}
+.chip-机考{background:#8E2F26}
+.tb-tag{border:1px solid var(--rule2);background:#fff;border-radius:2px;font-size:12.5px;padding:3px 11px}
+.tb-tag.on{background:var(--txt);color:#fff;border-color:var(--txt)}
+
+/* 折叠区 / 表格 / 弹层 */
+details{background:#fff;border:1px solid var(--rule);border-radius:0;padding:11px 14px;margin-top:26px}
+summary{font-size:13.5px;font-weight:600}
+table{font-size:12.5px}
+th,td{border-bottom:1px solid var(--rule);padding:7px 9px}
+th{color:var(--sub);font-weight:600;font-size:12px;letter-spacing:.05em}
+.log{background:#16191B;color:#C6CBC9;border-radius:0;font-size:12px}
+.log b{color:#9EC0D6}
+code.cmd{background:var(--paper2);border:1px solid var(--rule);border-radius:2px;font-size:12px}
+.hint{color:var(--sub);font-size:12.5px}
+.hint code{background:var(--paper2);border-radius:2px;padding:1px 5px}
+.empty{color:var(--sub);font-size:13px}
+
+.mask{background:rgba(21,25,28,.42)}
+.modal{background:#fff;border-radius:0;box-shadow:0 18px 46px rgba(21,25,28,.26);
+  border:1px solid var(--rule2)}
+.mh{font-family:"Noto Serif SC",serif;font-weight:700;font-size:17px;
+  border-bottom:1px solid var(--rule);padding:15px 17px}
+.mx{color:#6E7578}.mx:hover{color:var(--zhu)}
+.mb{font-size:14px;padding:15px 17px}
+.mf{border-top:1px solid var(--rule);padding:13px 17px}
+#nmask input,#nmask textarea,#b-text,#w-text,#s-text{
+  border-radius:0;border:1px solid var(--rule2);background:#FCFCFA;font-size:13.5px}
+#nmask input:focus,#nmask textarea:focus,#b-text:focus{outline:2px solid #D8D5CC;border-color:var(--txt)}
+#nmask .fl{color:#3F474A;font-size:12.5px;letter-spacing:.02em}
+.cal{border:1px solid var(--rule2);border-radius:0;box-shadow:0 10px 26px rgba(21,25,28,.10)}
+.cal .cn{border-radius:0;border-color:var(--rule2)}
+.cal .cn:hover{border-color:var(--txt);color:var(--txt)}
+.cal .cd{border-radius:0}
+.cal .cd:hover{background:var(--paper2)}
+.cal .cd.today{outline:1px dashed var(--rule2)}
+.cal .cd.sel{background:var(--txt);color:#fff}
+.cal .ct select{border-radius:0;border-color:var(--rule2)}
+.quick .btn-mini,.cal .ct .btn-mini{border-radius:0}
+.glist{border-radius:0;border-color:var(--rule2)}
+.gsec{background:var(--paper2);color:#3F474A}
+.grow:hover{background:#FCFCFA}
+.grow input{accent-color:var(--zhu)}
+.gt-sel,.gt-name,.gt-color{border-radius:0;border-color:var(--rule2)}
+.gt-clear{background:#E4E6E1;color:#4A5254;border-radius:0}
+.gt-clear:hover{background:#F0D8D4;color:#8E2F26}
+.newbar{border:1px solid #DCC79A;border-left:3px solid #8A6A1F;background:#FCF8EE;
+  border-radius:0;color:#7A5D18}
+.newbar b{color:#6B4E12}
+.newbar .nb-go{border-radius:0;background:#8A6A1F}
+.pinbtn{opacity:.42}.pinbtn:hover,.pinbtn.on{opacity:1}
+.toast{background:#24292B;border-radius:2px;font-size:13px}
+#checkbar{background:#FCF8EE;border:1px solid #DCC79A;border-radius:0}
+.chk-title{color:#6B4E12}
+.chk-list{color:#7A5D18}
+.steps li:before{background:#E4E6E1;color:#3F474A;border-radius:0}
+.quadwrap .quad{border-radius:0;border-color:var(--rule)}
+.quad-title{border-radius:0}
+.quad.q1 .quad-title{background:#FBF4F3;color:#8E2F26}
+.quad.q2 .quad-title{background:#FCF8EE;color:#7A5D18}
+.quad.q3 .quad-title{background:#F2F7F4;color:#245540}
+.quad.q4 .quad-title{background:var(--paper2);color:#3F474A}
+.quad-cnt{background:none;border:1px solid var(--rule2);border-radius:2px}
+.quad-body .item{border-radius:0}
+
+@media (max-width:700px){
+  .wrap{padding:20px 14px 74px}
+  .mast{flex-direction:column;align-items:flex-start;gap:6px;border-bottom-width:2px}
+  h1{font-size:27px}
+  .meta{text-align:left;white-space:pre-line;font-size:12px;align-self:flex-start}
+  .stats{flex-wrap:nowrap;border-bottom:1px solid var(--rule)}
+  .stat{padding:0 12px 0 0;margin:0 12px 0 0;text-align:left;flex:1 1 0;min-width:0}
+  .stat b{font-size:21px}
+  .stat span{font-size:12px}
+  .viewbar a{font-size:12px;padding:8px 4px}
+.t{font-size:14.5px}
+}
+
+/* ========== 方向 2「现在」布局：264px 左栏 + 焦点带 + 未来 120 小时 ========== */
+.shell{display:grid;grid-template-columns:264px minmax(0,1fr);align-items:start}
+.side{position:sticky;top:0;height:100vh;overflow-y:auto;box-sizing:border-box;
+  background:var(--paper2);border-right:1px solid var(--rule);padding:24px 20px 28px}
+.main{min-width:0;max-width:1180px;padding:24px 34px 90px}
+.sidehead{margin:0 0 20px;padding:0 0 16px;border-bottom:1px solid var(--rule)}
+.srow{display:flex;align-items:baseline;gap:7px;margin:0 0 10px}
+.srow .dot{width:7px;height:7px;border-radius:50%;background:var(--zhu);flex:0 0 auto;align-self:center}
+.side h1{font-family:"Noto Serif SC",serif;font-weight:900;font-size:20px;letter-spacing:-.2px;
+  margin:0;line-height:1.2;border-bottom:0;padding:0}
+.srow .sep{color:#5C6366;font-size:15px}
+.srow .nowlbl{font-family:"Cascadia Mono",Consolas,monospace;font-size:12px;color:var(--sub);letter-spacing:.06em}
+.side .meta{text-align:left;font-size:12px;line-height:1.75;white-space:pre-line;color:var(--sub)}
+
+.d2nav{display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+  padding:9px 10px;border-left:3px solid transparent;color:#3F474A;font-size:13.5px;line-height:1.3}
+.d2nav .d2navn{font-family:"Cascadia Mono",Consolas,monospace;font-size:12px;color:var(--sub)}
+.d2nav.on{border-left-color:var(--zhu);background:#fff;color:var(--txt);font-weight:700}
+.d2nav.on .d2navn{color:var(--zhu)}
+
+.sbignum{font-family:"Noto Serif SC",serif;font-weight:900;font-size:46px;line-height:.95;color:var(--zhu)}
+.sbigh{font-size:13px;line-height:1.45;color:var(--txt);margin:4px 0 0}
+.sbarcap{font-size:12px;line-height:1.65;color:var(--sub);margin:10px 0 14px}
+.sbar{display:grid;grid-template-columns:54px 1fr 32px;gap:9px;align-items:center;
+  font-size:12px;color:#3F474A;padding:5px 0}
+.sbar .track{display:block;height:2px;background:#C9CCC6;position:relative}
+.sbar .track b{position:absolute;left:0;top:0;height:2px;background:#3F474A}
+.sbar.s1 .track b{background:var(--zhu)}
+.sbar .n{text-align:right;font-family:"Cascadia Mono",Consolas,monospace;font-size:12px;color:var(--txt)}
+
+.sidesearch input{width:100%;box-sizing:border-box;border:1px solid var(--rule2);border-radius:0;
+  background:#fff;color:var(--txt);padding:8px 10px;margin:20px 0 0;font-size:13px;
+  font-family:inherit;line-height:1.4}
+.sidesearch input:focus{outline:2px solid #D8D5CC;border-color:var(--txt)}
+.sidefoot{margin-top:18px;padding-top:14px;border-top:1px solid var(--rule);
+  font-size:12px;line-height:1.7;color:var(--sub)}
+
+.lead{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;
+  padding:0 0 16px;margin:0;border-bottom:1px solid var(--rule)}
+.leadt{font-family:"Noto Serif SC",serif;font-weight:900;font-size:15px;margin:0 0 6px}
+.leadsub{margin:0;font-size:13px;line-height:1.68;color:#3F474A;max-width:62ch}
+.leadr{display:flex;flex:0 0 auto}
+.leadr .lstat{padding:0 16px;border-left:1px solid var(--rule);text-align:right;min-width:66px}
+.leadr .lstat:first-child{border-left:0;padding-left:0}
+.leadr b{display:block;font-family:"Cascadia Mono",Consolas,monospace;font-size:17px;color:var(--txt)}
+.leadr span{font-size:12px;color:var(--sub)}
+
+.fband{display:grid;grid-template-columns:minmax(0,1fr) 330px;border-bottom:1px solid var(--rule)}
+.fmain{padding:22px 26px 26px 0;min-width:0}
+.fkick{font-family:"Cascadia Mono",Consolas,monospace;font-size:12px;letter-spacing:.09em;
+  color:var(--zhu);margin:0 0 10px}
+.ft{font-family:"Noto Serif SC",serif;font-weight:900;font-size:26px;line-height:1.3;margin:0 0 12px}
+.fmeta{font-size:12.5px;color:var(--sub);margin:0 0 4px}
+.fnote{font-size:12.5px;color:#7A5D18;background:#FCF8EE;border:1px solid #DCC79A;
+  border-left:3px solid #8A6A1F;padding:7px 10px;margin:12px 0 16px;display:inline-block}
+.fbtns{display:flex;gap:9px;flex-wrap:wrap}
+.ftl{border-left:1px solid var(--rule);padding:22px 0 22px 22px;min-width:0}
+.ftlh{font-size:12px;letter-spacing:.07em;color:var(--sub);margin:0 0 10px}
+.tlrow{display:grid;grid-template-columns:13px minmax(0,1fr);gap:9px;padding:8px 0}
+.tlrow .tlpt{width:9px;height:9px;border-radius:50%;border:1px solid var(--rule2);
+  background:#fff;margin-top:5px;justify-self:center}
+.tlrow.hot .tlpt{background:var(--zhu);border-color:var(--zhu)}
+.tlrow .tlmeta{font-family:"Cascadia Mono",Consolas,monospace;font-size:12px;color:var(--sub)}
+.tlrow .tlt{font-size:13px;line-height:1.5;color:var(--txt);margin:1px 0 0}
+.tlrow .tlg{font-size:12px;color:var(--sub);margin:1px 0 0}
+.tlmore{font-size:12px;color:var(--sub);padding:8px 0 0}
+.item.flash{background:#FCF8EE;border-color:#DCC79A}
+.d2empty{font-size:13px;color:var(--sub);padding:18px 0}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--rule);padding:18px 16px}
+  .main{padding:18px 14px 80px}
+  .lead{flex-direction:column;gap:12px}
+  .leadr .lstat{padding:0 12px;min-width:0}
+  .fband{grid-template-columns:1fr}
+  .fmain{padding:18px 0 16px}
+  .ftl{border-left:0;border-top:1px solid var(--rule);padding:16px 0 0}
+  .ft{font-size:21px}
+  .sbignum{font-size:36px}
+}
+</style>
 </head>
 <div id="checkbar"></div>
 <body>
-<div class="wrap">
-  <h1>我的待办日程</h1>
-  <div class="meta" id="meta"></div>
-  <div class="paidbar" id="paidbar" style="display:none"></div>
-  <div class="stats">
-    <div class="stat"><b id="s-todo">0</b><span>待办</span></div>
-    <div class="stat"><b id="s-done">0</b><span>已完成</span></div>
-    <div class="stat"><b id="s-today">0</b><span>今天/逾期未做</span></div>
-    <div class="stat"><b id="s-groups">0</b><span>来源群</span></div>
-  </div>
-  <div class="urgent" id="urgent" style="display:none"></div>
-  <div class="pinbar" id="pinbar" style="display:none"></div>
-  <div class="urgent scorebox" id="moocscore" style="display:none"></div>
+<div class="shell">
+  <aside class="side">
+    <div class="sidehead">
+      <div class="srow"><span class="dot"></span><h1>我的待办日程</h1><span class="sep">/</span><span class="nowlbl">now</span></div>
+      <div class="meta" id="meta"></div>
+    </div>
+    <nav class="sidenav" id="sidenav"></nav>
+    <div class="sidebars" id="sidebars"></div>
+    <div class="sidesearch"><input id="q" placeholder="搜索事项 / 群名 / 原文…"></div>
+    <div class="sidefoot" id="sidefoot"></div>
+  </aside>
+  <main class="main">
+    <div class="paidbar" id="paidbar" style="display:none"></div>
+    <div class="lead">
+      <div class="leadl">
+        <div class="leadt">现在该做什么</div>
+        <p class="leadsub" id="leadsub"></p>
+      </div>
+      <div class="leadr" id="leadr"></div>
+    </div>
+    <div id="focus"></div>
+    <div id="tl"></div>
+    <div class="urgent" id="urgent" style="display:none"></div>
+    <div class="pinbar" id="pinbar" style="display:none"></div>
+    <div class="urgent scorebox" id="moocscore" style="display:none"></div>
+    <div class="stats">
+      <div class="stat"><b id="s-todo">0</b><span>待办</span></div>
+      <div class="stat"><b id="s-done">0</b><span>已完成</span></div>
+      <div class="stat"><b id="s-today">0</b><span>今天/逾期未做</span></div>
+      <div class="stat"><b id="s-groups">0</b><span>来源群</span></div>
+    </div>
   <div class="toolbar">
-    <input id="q" placeholder="搜索事项 / 群名 / 原文…">
     <button class="btn btn-primary" id="btn-new">＋ 新建日程</button>
     <button class="btn btn-primary" id="btn-update">🔄 更新消息</button>
     <button class="btn" id="btn-verify">✅ 复核</button>
@@ -490,6 +828,7 @@ th{color:var(--sub);font-weight:600}
     <summary>关键词兜底线索（模型没判成待办、但含「截止/报名/作业/考试…」的消息，可人工核对）</summary>
     <div id="clue-body"></div>
   </details>
+  </main>
 </div>
 <div class="toast" id="toast"></div>
 <script>
@@ -1343,6 +1682,174 @@ function renderPins(){
   bar.style.display = "";
 }
 
+/* ---------- 方向 2「现在」：左栏计数 / 焦点带 / 未来 120 小时 ---------- */
+function d2Day(it){
+  const t = tsOf(it);
+  if (!isFinite(t)) return null;
+  const a = new Date(), b = new Date(t);
+  return Math.round((new Date(b.getFullYear(),b.getMonth(),b.getDate())
+                   - new Date(a.getFullYear(),a.getMonth(),a.getDate())) / 86400000);
+}
+function d2Key(it){ return (typeof nkey === "function") ? nkey(it) : String(it.id); }
+function d2OpenAll(){
+  return items.filter(it => !isDone(it.id) && !(it["新增"] && !confirmedLocal.has(d2Key(it))));
+}
+function d2Stamp(it){
+  const t = tsOf(it);
+  if (!isFinite(t)) return "无明确期限";
+  const d = new Date(t), p2 = n => (n < 10 ? "0" : "") + n;
+  const wd = ["周日","周一","周二","周三","周四","周五","周六"][d.getDay()];
+  const dd = d2Day(it);
+  const rel = (dd === null) ? "" : (dd < 0 ? "已过期 " + Math.abs(dd) + " 天" : (dd === 0 ? "今天" : dd + " 天后"));
+  return p2(d.getMonth()+1) + "/" + p2(d.getDate()) + " " + p2(d.getHours()) + ":" + p2(d.getMinutes())
+       + " · " + wd + (rel ? " · " + rel : "");
+}
+function d2Locate(it){
+  const row = document.querySelector('.item[data-id="' + String(it.id).replace(/"/g, '\"') + '"]');
+  if (!row){ toast("这条在下面的列表里"); return; }
+  row.scrollIntoView({ behavior:"smooth", block:"center" });
+  row.classList.add("flash");
+  setTimeout(() => row.classList.remove("flash"), 1600);
+}
+function d2Done(it){
+  const was = isDone(it.id);
+  if (!was){ state[it.id] = {done:true, ts:Date.now()}; UNDONE.delete(it.id); toast("已完成：" + it["事项"]); }
+  else { delete state[it.id]; UNDONE.add(it.id); toast("已撤销，移回待办：" + it["事项"]); }
+  saveUndone(); save();
+  if (it["记忆键"]) tickSend([it["记忆键"]], !was);
+  render();
+}
+function renderDir2(){
+  if (VIEW === "kb") return;
+  const side = document.getElementById("sidenav");
+  if (!side) return;
+  const open = d2OpenAll();
+  const in5  = open.filter(it => { const d = d2Day(it); return d !== null && d >= 0 && d <= 5; });
+  const over = open.filter(it => { const d = d2Day(it); return d !== null && d < 0; });
+  const week = open.filter(it => { const d = d2Day(it); return d !== null && d >= 0 && d <= 7; });
+  const later= open.filter(it => { const d = d2Day(it); return d === null || d > 5; });
+  const doneCnt = items.filter(it => isDone(it.id)).length;
+  const groupSet = new Set(items.map(it => it["来源群"]).filter(Boolean));
+
+  side.innerHTML = "";
+  [["在手上", in5.length, "5 天内到期"],
+   ["全部待办", open.length, "还没打勾的全部"],
+   ["本周", week.length, "7 天内"],
+   ["旧通知", over.length, "早就过期还挂着"],
+   ["已完成", doneCnt, "已经打勾"]].forEach(function(x, i){
+    const a = el("div", "d2nav" + (i === 0 ? " on" : ""));
+    a.title = x[2];
+    a.appendChild(el("span", "d2navt", x[0]));
+    a.appendChild(el("span", "d2navn", String(x[1])));
+    side.appendChild(a);
+  });
+
+  const sb = document.getElementById("sidebars");
+  if (sb){
+    sb.innerHTML = "";
+    sb.appendChild(el("div", "sbignum", String(in5.length)));
+    const h = el("div", "sbigh");
+    h.appendChild(document.createTextNode("件事在"));
+    h.appendChild(document.createElement("br"));
+    h.appendChild(document.createTextNode("120 小时内到期"));
+    sb.appendChild(h);
+    if (over.length) sb.appendChild(el("p", "sbarcap", "另有 " + over.length + " 条是早该处理掉的旧群通知，默认沉底。"));
+    const maxN = Math.max(in5.length, later.length, over.length, 1);
+    [["五天内", in5.length, "s1"], ["更晚", later.length, ""], ["已过期", over.length, ""]].forEach(function(x){
+      const row = el("div", "sbar " + x[2]);
+      row.appendChild(el("span", "lb", x[0]));
+      const tr = el("span", "track");
+      const b = el("b");
+      b.style.width = Math.round(x[1] / maxN * 100) + "%";
+      tr.appendChild(b);
+      row.appendChild(tr);
+      row.appendChild(el("span", "n", String(x[1])));
+      sb.appendChild(row);
+    });
+  }
+
+  const sf = document.getElementById("sidefoot");
+  if (sf){
+    sf.innerHTML = "";
+    sf.appendChild(el("div", "", groupSet.size + " 个来源群 · " + (DATA["覆盖群数"] || "—") + " 个群覆盖"));
+    sf.appendChild(el("div", "", "QQ · 微信 · MOOC · 雨课堂 · 学习通"));
+  }
+
+  const ls = document.getElementById("leadsub");
+  if (ls) ls.textContent = open.length + " 条待办里只有 " + in5.length + " 件在五天内到期。"
+    + (over.length ? "另有 " + over.length + " 条早就过期的旧通知默认沉底。" : "")
+    + "左边是最近这一件，右边是接下来 120 小时，下面是更远的。";
+
+  const lr = document.getElementById("leadr");
+  if (lr){
+    lr.innerHTML = "";
+    [["待办", open.length], ["今天", open.filter(it => d2Day(it) === 0).length], ["过期", over.length]].forEach(function(x){
+      const d = el("div", "lstat");
+      d.appendChild(el("b", "", String(x[1])));
+      d.appendChild(el("span", "", x[0]));
+      lr.appendChild(d);
+    });
+  }
+
+  const focus = document.getElementById("focus");
+  if (!focus) return;
+  focus.innerHTML = "";
+  const timed = open.filter(it => isFinite(tsOf(it))).sort((a, b) => tsOf(a) - tsOf(b));
+  const now0 = Date.now();
+  const upcoming = timed.filter(it => tsOf(it) >= now0);
+  const top = upcoming[0] || timed[0] || open[0];
+  if (!top){
+    focus.appendChild(el("div", "d2empty", "没有待办了，全部清空。"));
+    return;
+  }
+  const band = el("div", "fband");
+  const fm = el("div", "fmain");
+  const dd = d2Day(top);
+  const kick = (dd === null) ? "NEXT · 没有明确期限"
+    : (dd < 0 ? "NEXT · 已过期 " + Math.abs(dd) + " 天"
+              : (dd === 0 ? "NEXT · 今天到期" : "NEXT · " + dd + " 天后到期"));
+  fm.appendChild(el("div", "fkick", kick));
+  fm.appendChild(el("h3", "ft", top["事项"] || "（无标题）"));
+  const m1 = el("div", "fmeta");
+  m1.textContent = (top["截止"] ? "截止 " + top["截止"] : "没有截止时间") + "　·　来自 " + (groupNameOf(top) || "—");
+  fm.appendChild(m1);
+  const rel = relDeadline(top);
+  if (rel) fm.appendChild(el("div", "fnote", rel));
+  const btns = el("div", "fbtns");
+  const b1 = el("button", "btn btn-primary", "标记完成");
+  b1.onclick = () => d2Done(top);
+  const b2 = el("button", "btn", "看原文线索");
+  b2.onclick = () => d2Locate(top);
+  btns.appendChild(b1); btns.appendChild(b2);
+  fm.appendChild(btns);
+  band.appendChild(fm);
+
+  const rl = el("div", "ftl");
+  rl.appendChild(el("div", "ftlh", "未来 120 小时"));
+  const nowMs = Date.now(), H120 = nowMs + 120 * 3600 * 1000;
+  const soon = open.filter(it => { const t = tsOf(it); return isFinite(t) && t >= nowMs && t <= H120; })
+                   .sort((a, b) => tsOf(a) - tsOf(b));
+  const list = soon.length ? soon : timed.slice(0, 6);
+  list.slice(0, 9).forEach(function(it){
+    const row = el("div", "tlrow" + (d2Day(it) === 0 ? " hot" : ""));
+    row.appendChild(el("span", "tlpt"));
+    const c = el("div");
+    c.appendChild(el("div", "tlmeta", d2Stamp(it)));
+    c.appendChild(el("div", "tlt", it["事项"] || ""));
+    const g = groupNameOf(it);
+    if (g) c.appendChild(el("div", "tlg", g));
+    row.appendChild(c);
+    row.title = "点一下在下面定位这条";
+    row.style.cursor = "pointer";
+    row.onclick = () => d2Locate(it);
+    rl.appendChild(row);
+  });
+  if (!list.length) rl.appendChild(el("div", "d2empty", "120 小时内没有要交的东西。"));
+  if (soon.length > 9) rl.appendChild(el("div", "tlmore", "还有 " + (soon.length - 9) + " 条，往下走"));
+  band.appendChild(rl);
+  focus.appendChild(band);
+}
+
 function render(){  if (VIEW === "kb"){
     // 知识总结视图：顶部那条「💰 日程抽取用量」跟这一页无关，藏掉，只留页内「🧠 知识总结用量」
     const pb = document.getElementById("paidbar");
@@ -1488,7 +1995,14 @@ function render(){  if (VIEW === "kb"){
   document.getElementById("s-groups").textContent = groups.size;
   dedupeRows();   // 同一 data-id 只留一行（防多段渲染重复）
   const now = new Date();
-  document.getElementById("meta").textContent = `消息截止 ${DATA["消息截止"] || "—"}　·　生成于 ${DATA["生成时间"]}　·　最近一次更新消息 ${DATA["最近一次更新消息"] || "—"}　·　${items.length} 项　·　覆盖 ${DATA["覆盖群数"]} 个群　·　勾选状态自动保存在本机浏览器`;
+  document.getElementById("meta").textContent = [
+    `消息截止 ${DATA["消息截止"] || "—"}`,
+    `生成于 ${DATA["生成时间"]}`,
+    `更新消息 ${DATA["最近一次更新消息"] || "—"}`,
+    `${items.length} 项 · ${DATA["覆盖群数"]} 个群`,
+    "勾选状态保存在本机"
+  ].join(String.fromCharCode(10));
+  try { renderDir2(); } catch (e) { /* 左栏渲染失败不影响主列表 */ }
 }
 
 function renderGroupTags(){
@@ -2578,7 +3092,7 @@ async function loadBlacklistMeta(){
     const r = j.rules || {}, st = j.stats || {};
     const meta = document.getElementById("meta");
     if (!meta) return;
-    meta.textContent += "　·　黑名单：" + (r.群||[]).length + " 群 / " + (r.关键词||[]).length +
+    meta.textContent += String.fromCharCode(10) + "黑名单：" + (r.群||[]).length + " 群 / " + (r.关键词||[]).length +
       " 词 / " + (r.人||[]).length + " 人" + (st.命中 ? ("（上次滤掉 " + st.命中 + " 条）") : "");
   } catch(e) { /* 没服务就不显示 */ }
 }
