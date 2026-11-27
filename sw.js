@@ -6,7 +6,7 @@
  *
  * 任何以 /api/ 开头的请求、非 GET 请求、跨域请求（ntfy 中继等）一律不碰。
  */
-const CACHE = "dsh-sched-2026-11-26";
+const CACHE = "dsh-sched-2026-11-27";
 const OFFLINE_FALLBACK = "index.html";
 
 self.addEventListener("install", (e) => {
