@@ -1274,11 +1274,11 @@ async function confirmNew(it, row){
   } catch(e) { toast("已本地收入，但没写回（下次刷新可能还出现）"); }
 }
 
-/* 每日自检：默认折叠，点标题展开。展开状态记在本机（qq-chk-open-v1），
-   下次打开面板还是上次的样子；没有提醒时整块不出现。 */
-const CHK_OPEN = "qq-chk-open-v1";
-function chkOpenLoad(){ try { return localStorage.getItem(CHK_OPEN) === "1"; } catch(e){ return false; } }
-function chkOpenSave(v){ try { localStorage.setItem(CHK_OPEN, v ? "1" : "0"); } catch(e){} }
+/* 每日自检：默认折叠，点标题展开。展开状态只在本次页面内有效，
+   刷新回到折叠（用户 2026-11-27：默认折叠，点击打开）。没有提醒时整块不出现。 */
+let chkUserOpen = false;
+function chkOpenLoad(){ return chkUserOpen; }
+function chkOpenSave(v){ chkUserOpen = !!v; }
 
 function renderCheckBar(){
   const box = document.getElementById("checkbar");
@@ -1286,7 +1286,7 @@ function renderCheckBar(){
   const warns = (CHECK["提醒"] || []);
   if (!warns.length) { box.style.display = "none"; box.innerHTML = ""; return; }
   box.style.display = "block";
-  box.open = chkOpenLoad();
+  box.open = chkUserOpen;
   box.innerHTML = "";
   const sum = el("summary", "chk-title");
   sum.appendChild(el("span", "chk-ico", "🩺"));
